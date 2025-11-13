@@ -14,8 +14,8 @@ export class SpacetimeDB {
 		undefined as string | undefined
 	);
 
-	static getContext() {
-		return getContext<DbConnection>('SpacetimeDB');
+	static getContext<Connection = DbConnection>() {
+		return getContext<Connection>('SpacetimeDB');
 	}
 
 	static setContext(connection: DbConnection) {

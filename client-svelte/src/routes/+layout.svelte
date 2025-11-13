@@ -62,7 +62,7 @@
 	<error> An error occurred while connecting to SpacetimeDB. </error>
 {/if}
 
-{#if connection}
+{#if connection && $status === 'connected'}
 	<SpacetimeDBContext {connection}>
 		{@render children()}
 	</SpacetimeDBContext>
