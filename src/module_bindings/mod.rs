@@ -9,27 +9,37 @@ use spacetimedb_sdk::__codegen::{self as __sdk, __lib, __sats, __ws};
 pub mod circle_table;
 pub mod circle_type;
 pub mod client_connected_reducer;
+pub mod config_table;
+pub mod config_type;
 pub mod db_vector_2_type;
 pub mod debug_reducer;
+pub mod enter_game_reducer;
 pub mod entity_table;
 pub mod entity_type;
 pub mod food_table;
 pub mod food_type;
 pub mod identity_disconnected_reducer;
+pub mod logged_out_player_table;
 pub mod message_table;
 pub mod message_type;
+pub mod player_table;
+pub mod player_type;
 pub mod send_message_reducer;
 pub mod set_name_reducer;
-pub mod user_table;
-pub mod user_type;
+pub mod spawn_food_reducer;
+pub mod spawn_food_timer_table;
+pub mod spawn_food_timer_type;
 
 pub use circle_table::*;
 pub use circle_type::Circle;
 pub use client_connected_reducer::{
     client_connected, set_flags_for_client_connected, ClientConnectedCallbackId,
 };
+pub use config_table::*;
+pub use config_type::Config;
 pub use db_vector_2_type::DbVector2;
 pub use debug_reducer::{debug, set_flags_for_debug, DebugCallbackId};
+pub use enter_game_reducer::{enter_game, set_flags_for_enter_game, EnterGameCallbackId};
 pub use entity_table::*;
 pub use entity_type::Entity;
 pub use food_table::*;
@@ -37,12 +47,16 @@ pub use food_type::Food;
 pub use identity_disconnected_reducer::{
     identity_disconnected, set_flags_for_identity_disconnected, IdentityDisconnectedCallbackId,
 };
+pub use logged_out_player_table::*;
 pub use message_table::*;
 pub use message_type::Message;
+pub use player_table::*;
+pub use player_type::Player;
 pub use send_message_reducer::{send_message, set_flags_for_send_message, SendMessageCallbackId};
 pub use set_name_reducer::{set_flags_for_set_name, set_name, SetNameCallbackId};
-pub use user_table::*;
-pub use user_type::User;
+pub use spawn_food_reducer::{set_flags_for_spawn_food, spawn_food, SpawnFoodCallbackId};
+pub use spawn_food_timer_table::*;
+pub use spawn_food_timer_type::SpawnFoodTimer;
 
 #[derive(Clone, PartialEq, Debug)]
 
@@ -54,9 +68,11 @@ pub use user_type::User;
 pub enum Reducer {
     ClientConnected,
     Debug,
+    EnterGame,
     IdentityDisconnected,
     SendMessage { text: String },
     SetName { name: String },
+    SpawnFood { timer: SpawnFoodTimer },
 }
 
 impl __sdk::InModule for Reducer {
@@ -68,9 +84,11 @@ impl __sdk::Reducer for Reducer {
         match self {
             Reducer::ClientConnected => "client_connected",
             Reducer::Debug => "debug",
+            Reducer::EnterGame => "enter_game",
             Reducer::IdentityDisconnected => "identity_disconnected",
             Reducer::SendMessage { .. } => "send_message",
             Reducer::SetName { .. } => "set_name",
+            Reducer::SpawnFood { .. } => "spawn_food",
         }
     }
 }
@@ -87,6 +105,13 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
                 &value.args,
             )?
             .into()),
+            "enter_game" => Ok(
+                __sdk::parse_reducer_args::<enter_game_reducer::EnterGameArgs>(
+                    "enter_game",
+                    &value.args,
+                )?
+                .into(),
+            ),
             "identity_disconnected" => Ok(__sdk::parse_reducer_args::<
                 identity_disconnected_reducer::IdentityDisconnectedArgs,
             >("identity_disconnected", &value.args)?
@@ -103,6 +128,13 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
                 &value.args,
             )?
             .into()),
+            "spawn_food" => Ok(
+                __sdk::parse_reducer_args::<spawn_food_reducer::SpawnFoodArgs>(
+                    "spawn_food",
+                    &value.args,
+                )?
+                .into(),
+            ),
             unknown => {
                 Err(
                     __sdk::InternalError::unknown_name("reducer", unknown, "ReducerCallInfo")
@@ -118,10 +150,13 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
 #[doc(hidden)]
 pub struct DbUpdate {
     circle: __sdk::TableUpdate<Circle>,
+    config: __sdk::TableUpdate<Config>,
     entity: __sdk::TableUpdate<Entity>,
     food: __sdk::TableUpdate<Food>,
+    logged_out_player: __sdk::TableUpdate<Player>,
     message: __sdk::TableUpdate<Message>,
-    user: __sdk::TableUpdate<User>,
+    player: __sdk::TableUpdate<Player>,
+    spawn_food_timer: __sdk::TableUpdate<SpawnFoodTimer>,
 }
 
 impl TryFrom<__ws::DatabaseUpdate<__ws::BsatnFormat>> for DbUpdate {
@@ -133,18 +168,27 @@ impl TryFrom<__ws::DatabaseUpdate<__ws::BsatnFormat>> for DbUpdate {
                 "circle" => db_update
                     .circle
                     .append(circle_table::parse_table_update(table_update)?),
+                "config" => db_update
+                    .config
+                    .append(config_table::parse_table_update(table_update)?),
                 "entity" => db_update
                     .entity
                     .append(entity_table::parse_table_update(table_update)?),
                 "food" => db_update
                     .food
                     .append(food_table::parse_table_update(table_update)?),
+                "logged_out_player" => db_update
+                    .logged_out_player
+                    .append(logged_out_player_table::parse_table_update(table_update)?),
                 "message" => db_update
                     .message
                     .append(message_table::parse_table_update(table_update)?),
-                "user" => db_update
-                    .user
-                    .append(user_table::parse_table_update(table_update)?),
+                "player" => db_update
+                    .player
+                    .append(player_table::parse_table_update(table_update)?),
+                "spawn_food_timer" => db_update
+                    .spawn_food_timer
+                    .append(spawn_food_timer_table::parse_table_update(table_update)?),
 
                 unknown => {
                     return Err(__sdk::InternalError::unknown_name(
@@ -174,16 +218,25 @@ impl __sdk::DbUpdate for DbUpdate {
         diff.circle = cache
             .apply_diff_to_table::<Circle>("circle", &self.circle)
             .with_updates_by_pk(|row| &row.entity_id);
+        diff.config = cache
+            .apply_diff_to_table::<Config>("config", &self.config)
+            .with_updates_by_pk(|row| &row.id);
         diff.entity = cache
             .apply_diff_to_table::<Entity>("entity", &self.entity)
             .with_updates_by_pk(|row| &row.entity_id);
         diff.food = cache
             .apply_diff_to_table::<Food>("food", &self.food)
             .with_updates_by_pk(|row| &row.entity_id);
-        diff.message = cache.apply_diff_to_table::<Message>("message", &self.message);
-        diff.user = cache
-            .apply_diff_to_table::<User>("user", &self.user)
+        diff.logged_out_player = cache
+            .apply_diff_to_table::<Player>("logged_out_player", &self.logged_out_player)
             .with_updates_by_pk(|row| &row.identity);
+        diff.message = cache.apply_diff_to_table::<Message>("message", &self.message);
+        diff.player = cache
+            .apply_diff_to_table::<Player>("player", &self.player)
+            .with_updates_by_pk(|row| &row.identity);
+        diff.spawn_food_timer = cache
+            .apply_diff_to_table::<SpawnFoodTimer>("spawn_food_timer", &self.spawn_food_timer)
+            .with_updates_by_pk(|row| &row.scheduled_id);
 
         diff
     }
@@ -194,10 +247,13 @@ impl __sdk::DbUpdate for DbUpdate {
 #[doc(hidden)]
 pub struct AppliedDiff<'r> {
     circle: __sdk::TableAppliedDiff<'r, Circle>,
+    config: __sdk::TableAppliedDiff<'r, Config>,
     entity: __sdk::TableAppliedDiff<'r, Entity>,
     food: __sdk::TableAppliedDiff<'r, Food>,
+    logged_out_player: __sdk::TableAppliedDiff<'r, Player>,
     message: __sdk::TableAppliedDiff<'r, Message>,
-    user: __sdk::TableAppliedDiff<'r, User>,
+    player: __sdk::TableAppliedDiff<'r, Player>,
+    spawn_food_timer: __sdk::TableAppliedDiff<'r, SpawnFoodTimer>,
 }
 
 impl __sdk::InModule for AppliedDiff<'_> {
@@ -211,10 +267,21 @@ impl<'r> __sdk::AppliedDiff<'r> for AppliedDiff<'r> {
         callbacks: &mut __sdk::DbCallbacks<RemoteModule>,
     ) {
         callbacks.invoke_table_row_callbacks::<Circle>("circle", &self.circle, event);
+        callbacks.invoke_table_row_callbacks::<Config>("config", &self.config, event);
         callbacks.invoke_table_row_callbacks::<Entity>("entity", &self.entity, event);
         callbacks.invoke_table_row_callbacks::<Food>("food", &self.food, event);
+        callbacks.invoke_table_row_callbacks::<Player>(
+            "logged_out_player",
+            &self.logged_out_player,
+            event,
+        );
         callbacks.invoke_table_row_callbacks::<Message>("message", &self.message, event);
-        callbacks.invoke_table_row_callbacks::<User>("user", &self.user, event);
+        callbacks.invoke_table_row_callbacks::<Player>("player", &self.player, event);
+        callbacks.invoke_table_row_callbacks::<SpawnFoodTimer>(
+            "spawn_food_timer",
+            &self.spawn_food_timer,
+            event,
+        );
     }
 }
 
@@ -806,9 +873,12 @@ impl __sdk::SpacetimeModule for RemoteModule {
 
     fn register_tables(client_cache: &mut __sdk::ClientCache<Self>) {
         circle_table::register_table(client_cache);
+        config_table::register_table(client_cache);
         entity_table::register_table(client_cache);
         food_table::register_table(client_cache);
+        logged_out_player_table::register_table(client_cache);
         message_table::register_table(client_cache);
-        user_table::register_table(client_cache);
+        player_table::register_table(client_cache);
+        spawn_food_timer_table::register_table(client_cache);
     }
 }
