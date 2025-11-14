@@ -28,44 +28,34 @@ import {
   type TableHandle as __TableHandle,
 } from "spacetimedb";
 
-export type User = {
-  identity: __Identity,
-  playerId: number,
-  name: string | undefined,
-  online: boolean,
-};
-let _cached_User_type_value: __AlgebraicTypeType | null = null;
+export type EnterGame = {};
+let _cached_EnterGame_type_value: __AlgebraicTypeType | null = null;
 
 /**
  * An object for generated helper functions.
  */
-export const User = {
+export const EnterGame = {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    if (_cached_User_type_value) return _cached_User_type_value;
-    _cached_User_type_value = __AlgebraicTypeValue.Product({ elements: [] });
-    _cached_User_type_value.value.elements.push(
-      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
-      { name: "playerId", algebraicType: __AlgebraicTypeValue.I32 },
-      { name: "name", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
-      { name: "online", algebraicType: __AlgebraicTypeValue.Bool },
+    if (_cached_EnterGame_type_value) return _cached_EnterGame_type_value;
+    _cached_EnterGame_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_EnterGame_type_value.value.elements.push(
     );
-    return _cached_User_type_value;
+    return _cached_EnterGame_type_value;
   },
 
-  serialize(writer: __BinaryWriter, value: User): void {
-    __AlgebraicTypeValue.serializeValue(writer, User.getTypeScriptAlgebraicType(), value);
+  serialize(writer: __BinaryWriter, value: EnterGame): void {
+    __AlgebraicTypeValue.serializeValue(writer, EnterGame.getTypeScriptAlgebraicType(), value);
   },
 
-  deserialize(reader: __BinaryReader): User {
-    return __AlgebraicTypeValue.deserializeValue(reader, User.getTypeScriptAlgebraicType());
+  deserialize(reader: __BinaryReader): EnterGame {
+    return __AlgebraicTypeValue.deserializeValue(reader, EnterGame.getTypeScriptAlgebraicType());
   },
 
 }
 
-export default User;
-
+export default EnterGame;
 

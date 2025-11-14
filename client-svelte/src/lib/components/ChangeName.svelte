@@ -2,12 +2,11 @@
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 
-	// conn.reducers.setName(newName);
 	const client = SpacetimeDB.getContext();
 
 	let name = $state('');
 
-	const userData = new TableQuery('user');
+	const userData = new TableQuery('player');
 
 	let user = $derived(
 		userData.rows.find((u) => u.identity.toHexString() === client.identity?.toHexString())

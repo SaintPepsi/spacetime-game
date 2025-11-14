@@ -1,14 +1,49 @@
-<script>
+<script lang="ts">
+	import Arena from '$lib/components/Arena.svelte';
+	import Canvas from '$lib/components/Canvas.svelte';
 	import ChangeName from '$lib/components/ChangeName.svelte';
 	import DebugButton from '$lib/components/DebugButton.svelte';
+	import Entities from '$lib/components/Entities.svelte';
 	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
+	import { createScene, type BaseScene } from '$lib/createScene';
+
+	let sceneContext = $state<BaseScene | null>(null);
+
+	async function onCreate(canvasContainer: HTMLDivElement) {
+		sceneContext = await createScene(canvasContainer, 1);
+	}
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<main>
+	<TotalOnlinePlayers />
 
-<TotalOnlinePlayers />
+	<ChangeName />
 
-<ChangeName />
+	<DebugButton />
 
-<DebugButton />
+	{#if sceneContext}
+		<p>Scene context initialized</p>
+
+		<Arena stage={sceneContext.app.stage}>
+			<Entities />
+		</Arena>
+	{/if}
+	<view>
+		<Canvas {onCreate} />
+	</view>
+</main>
+
+<style>
+	main {
+		display: flex;
+		width: 100dvw;
+		height: 100dvh;
+		flex-direction: column;
+	}
+
+	view {
+		flex: 1;
+		position: relative;
+		overflow: hidden;
+	}
+</style>

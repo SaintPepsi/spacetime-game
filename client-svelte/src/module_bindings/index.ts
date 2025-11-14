@@ -35,28 +35,40 @@ import { ClientConnected } from "./client_connected_reducer.ts";
 export { ClientConnected };
 import { Debug } from "./debug_reducer.ts";
 export { Debug };
+import { EnterGame } from "./enter_game_reducer.ts";
+export { EnterGame };
 import { IdentityDisconnected } from "./identity_disconnected_reducer.ts";
 export { IdentityDisconnected };
 import { SendMessage } from "./send_message_reducer.ts";
 export { SendMessage };
 import { SetName } from "./set_name_reducer.ts";
 export { SetName };
+import { SpawnFood } from "./spawn_food_reducer.ts";
+export { SpawnFood };
 
 // Import and reexport all table handle types
 import { CircleTableHandle } from "./circle_table.ts";
 export { CircleTableHandle };
+import { ConfigTableHandle } from "./config_table.ts";
+export { ConfigTableHandle };
 import { EntityTableHandle } from "./entity_table.ts";
 export { EntityTableHandle };
 import { FoodTableHandle } from "./food_table.ts";
 export { FoodTableHandle };
+import { LoggedOutPlayerTableHandle } from "./logged_out_player_table.ts";
+export { LoggedOutPlayerTableHandle };
 import { MessageTableHandle } from "./message_table.ts";
 export { MessageTableHandle };
-import { UserTableHandle } from "./user_table.ts";
-export { UserTableHandle };
+import { PlayerTableHandle } from "./player_table.ts";
+export { PlayerTableHandle };
+import { SpawnFoodTimerTableHandle } from "./spawn_food_timer_table.ts";
+export { SpawnFoodTimerTableHandle };
 
 // Import and reexport all types
 import { Circle } from "./circle_type.ts";
 export { Circle };
+import { Config } from "./config_type.ts";
+export { Config };
 import { DbVector2 } from "./db_vector_2_type.ts";
 export { DbVector2 };
 import { Entity } from "./entity_type.ts";
@@ -65,8 +77,10 @@ import { Food } from "./food_type.ts";
 export { Food };
 import { Message } from "./message_type.ts";
 export { Message };
-import { User } from "./user_type.ts";
-export { User };
+import { Player } from "./player_type.ts";
+export { Player };
+import { SpawnFoodTimer } from "./spawn_food_timer_type.ts";
+export { SpawnFoodTimer };
 
 const REMOTE_MODULE = {
   tables: {
@@ -77,6 +91,15 @@ const REMOTE_MODULE = {
       primaryKeyInfo: {
         colName: "entityId",
         colType: (Circle.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
+    config: {
+      tableName: "config" as const,
+      rowType: Config.getTypeScriptAlgebraicType(),
+      primaryKey: "id",
+      primaryKeyInfo: {
+        colName: "id",
+        colType: (Config.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
       },
     },
     entity: {
@@ -97,17 +120,35 @@ const REMOTE_MODULE = {
         colType: (Food.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
       },
     },
+    logged_out_player: {
+      tableName: "logged_out_player" as const,
+      rowType: Player.getTypeScriptAlgebraicType(),
+      primaryKey: "identity",
+      primaryKeyInfo: {
+        colName: "identity",
+        colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
     message: {
       tableName: "message" as const,
       rowType: Message.getTypeScriptAlgebraicType(),
     },
-    user: {
-      tableName: "user" as const,
-      rowType: User.getTypeScriptAlgebraicType(),
+    player: {
+      tableName: "player" as const,
+      rowType: Player.getTypeScriptAlgebraicType(),
       primaryKey: "identity",
       primaryKeyInfo: {
         colName: "identity",
-        colType: (User.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+        colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
+    spawn_food_timer: {
+      tableName: "spawn_food_timer" as const,
+      rowType: SpawnFoodTimer.getTypeScriptAlgebraicType(),
+      primaryKey: "scheduledId",
+      primaryKeyInfo: {
+        colName: "scheduledId",
+        colType: (SpawnFoodTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
       },
     },
   },
@@ -120,6 +161,10 @@ const REMOTE_MODULE = {
       reducerName: "debug",
       argsType: Debug.getTypeScriptAlgebraicType(),
     },
+    enter_game: {
+      reducerName: "enter_game",
+      argsType: EnterGame.getTypeScriptAlgebraicType(),
+    },
     identity_disconnected: {
       reducerName: "identity_disconnected",
       argsType: IdentityDisconnected.getTypeScriptAlgebraicType(),
@@ -131,6 +176,10 @@ const REMOTE_MODULE = {
     set_name: {
       reducerName: "set_name",
       argsType: SetName.getTypeScriptAlgebraicType(),
+    },
+    spawn_food: {
+      reducerName: "spawn_food",
+      argsType: SpawnFood.getTypeScriptAlgebraicType(),
     },
   },
   versionInfo: {
@@ -164,9 +213,11 @@ const REMOTE_MODULE = {
 export type Reducer = never
 | { name: "ClientConnected", args: ClientConnected }
 | { name: "Debug", args: Debug }
+| { name: "EnterGame", args: EnterGame }
 | { name: "IdentityDisconnected", args: IdentityDisconnected }
 | { name: "SendMessage", args: SendMessage }
 | { name: "SetName", args: SetName }
+| { name: "SpawnFood", args: SpawnFood }
 ;
 
 export class RemoteReducers {
@@ -190,6 +241,18 @@ export class RemoteReducers {
 
   removeOnDebug(callback: (ctx: ReducerEventContext) => void) {
     this.connection.offReducer("debug", callback);
+  }
+
+  enterGame() {
+    this.connection.callReducer("enter_game", new Uint8Array(0), this.setCallReducerFlags.enterGameFlags);
+  }
+
+  onEnterGame(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.onReducer("enter_game", callback);
+  }
+
+  removeOnEnterGame(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.offReducer("enter_game", callback);
   }
 
   onIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
@@ -232,12 +295,33 @@ export class RemoteReducers {
     this.connection.offReducer("set_name", callback);
   }
 
+  spawnFood(timer: SpawnFoodTimer) {
+    const __args = { timer };
+    let __writer = new __BinaryWriter(1024);
+    SpawnFood.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("spawn_food", __argsBuffer, this.setCallReducerFlags.spawnFoodFlags);
+  }
+
+  onSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
+    this.connection.onReducer("spawn_food", callback);
+  }
+
+  removeOnSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
+    this.connection.offReducer("spawn_food", callback);
+  }
+
 }
 
 export class SetReducerFlags {
   debugFlags: __CallReducerFlags = 'FullUpdate';
   debug(flags: __CallReducerFlags) {
     this.debugFlags = flags;
+  }
+
+  enterGameFlags: __CallReducerFlags = 'FullUpdate';
+  enterGame(flags: __CallReducerFlags) {
+    this.enterGameFlags = flags;
   }
 
   sendMessageFlags: __CallReducerFlags = 'FullUpdate';
@@ -250,6 +334,11 @@ export class SetReducerFlags {
     this.setNameFlags = flags;
   }
 
+  spawnFoodFlags: __CallReducerFlags = 'FullUpdate';
+  spawnFood(flags: __CallReducerFlags) {
+    this.spawnFoodFlags = flags;
+  }
+
 }
 
 export class RemoteTables {
@@ -258,6 +347,11 @@ export class RemoteTables {
   get circle(): CircleTableHandle<'circle'> {
     // clientCache is a private property
     return new CircleTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Circle>(REMOTE_MODULE.tables.circle));
+  }
+
+  get config(): ConfigTableHandle<'config'> {
+    // clientCache is a private property
+    return new ConfigTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Config>(REMOTE_MODULE.tables.config));
   }
 
   get entity(): EntityTableHandle<'entity'> {
@@ -270,14 +364,24 @@ export class RemoteTables {
     return new FoodTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Food>(REMOTE_MODULE.tables.food));
   }
 
+  get loggedOutPlayer(): LoggedOutPlayerTableHandle<'logged_out_player'> {
+    // clientCache is a private property
+    return new LoggedOutPlayerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.logged_out_player));
+  }
+
   get message(): MessageTableHandle<'message'> {
     // clientCache is a private property
     return new MessageTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Message>(REMOTE_MODULE.tables.message));
   }
 
-  get user(): UserTableHandle<'user'> {
+  get player(): PlayerTableHandle<'player'> {
     // clientCache is a private property
-    return new UserTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<User>(REMOTE_MODULE.tables.user));
+    return new PlayerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.player));
+  }
+
+  get spawnFoodTimer(): SpawnFoodTimerTableHandle<'spawn_food_timer'> {
+    // clientCache is a private property
+    return new SpawnFoodTimerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<SpawnFoodTimer>(REMOTE_MODULE.tables.spawn_food_timer));
   }
 }
 

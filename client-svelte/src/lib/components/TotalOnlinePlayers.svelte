@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { eq, TableQuery, where } from '$lib/runes/SpacetimeTable.svelte';
+	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 
 	const client = SpacetimeDB.getContext();
 
 	let status = SpacetimeDB.status;
-	const userData = new TableQuery('user', where(eq('online', true)));
+	const userData = new TableQuery('player');
 
 	let onlinePlayerCount = $derived(userData.rows.length);
 </script>
@@ -16,7 +16,7 @@
 
 {#each userData.rows as user (user.identity.toHexString())}
 	<div class="player">
-		{user.identity} - {user.name} - Player ID: {user.playerId} - online: {user.online}
+		{user.identity} - {user.name} - Player ID: {user.playerId}
 	</div>
 {/each}
 
