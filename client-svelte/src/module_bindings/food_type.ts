@@ -28,44 +28,38 @@ import {
   type TableHandle as __TableHandle,
 } from "spacetimedb";
 
-export type User = {
-  identity: __Identity,
-  playerId: number,
-  name: string | undefined,
-  online: boolean,
+export type Food = {
+  entityId: number,
 };
-let _cached_User_type_value: __AlgebraicTypeType | null = null;
+let _cached_Food_type_value: __AlgebraicTypeType | null = null;
 
 /**
  * An object for generated helper functions.
  */
-export const User = {
+export const Food = {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    if (_cached_User_type_value) return _cached_User_type_value;
-    _cached_User_type_value = __AlgebraicTypeValue.Product({ elements: [] });
-    _cached_User_type_value.value.elements.push(
-      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
-      { name: "playerId", algebraicType: __AlgebraicTypeValue.I32 },
-      { name: "name", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
-      { name: "online", algebraicType: __AlgebraicTypeValue.Bool },
+    if (_cached_Food_type_value) return _cached_Food_type_value;
+    _cached_Food_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_Food_type_value.value.elements.push(
+      { name: "entityId", algebraicType: __AlgebraicTypeValue.I32 },
     );
-    return _cached_User_type_value;
+    return _cached_Food_type_value;
   },
 
-  serialize(writer: __BinaryWriter, value: User): void {
-    __AlgebraicTypeValue.serializeValue(writer, User.getTypeScriptAlgebraicType(), value);
+  serialize(writer: __BinaryWriter, value: Food): void {
+    __AlgebraicTypeValue.serializeValue(writer, Food.getTypeScriptAlgebraicType(), value);
   },
 
-  deserialize(reader: __BinaryReader): User {
-    return __AlgebraicTypeValue.deserializeValue(reader, User.getTypeScriptAlgebraicType());
+  deserialize(reader: __BinaryReader): Food {
+    return __AlgebraicTypeValue.deserializeValue(reader, Food.getTypeScriptAlgebraicType());
   },
 
 }
 
-export default User;
+export default Food;
 
 

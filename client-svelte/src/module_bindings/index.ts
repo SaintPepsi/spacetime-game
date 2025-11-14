@@ -33,6 +33,8 @@ import {
 // Import and reexport all reducer arg types
 import { ClientConnected } from "./client_connected_reducer.ts";
 export { ClientConnected };
+import { Debug } from "./debug_reducer.ts";
+export { Debug };
 import { IdentityDisconnected } from "./identity_disconnected_reducer.ts";
 export { IdentityDisconnected };
 import { SendMessage } from "./send_message_reducer.ts";
@@ -41,12 +43,26 @@ import { SetName } from "./set_name_reducer.ts";
 export { SetName };
 
 // Import and reexport all table handle types
+import { CircleTableHandle } from "./circle_table.ts";
+export { CircleTableHandle };
+import { EntityTableHandle } from "./entity_table.ts";
+export { EntityTableHandle };
+import { FoodTableHandle } from "./food_table.ts";
+export { FoodTableHandle };
 import { MessageTableHandle } from "./message_table.ts";
 export { MessageTableHandle };
 import { UserTableHandle } from "./user_table.ts";
 export { UserTableHandle };
 
 // Import and reexport all types
+import { Circle } from "./circle_type.ts";
+export { Circle };
+import { DbVector2 } from "./db_vector_2_type.ts";
+export { DbVector2 };
+import { Entity } from "./entity_type.ts";
+export { Entity };
+import { Food } from "./food_type.ts";
+export { Food };
 import { Message } from "./message_type.ts";
 export { Message };
 import { User } from "./user_type.ts";
@@ -54,6 +70,33 @@ export { User };
 
 const REMOTE_MODULE = {
   tables: {
+    circle: {
+      tableName: "circle" as const,
+      rowType: Circle.getTypeScriptAlgebraicType(),
+      primaryKey: "entityId",
+      primaryKeyInfo: {
+        colName: "entityId",
+        colType: (Circle.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
+    entity: {
+      tableName: "entity" as const,
+      rowType: Entity.getTypeScriptAlgebraicType(),
+      primaryKey: "entityId",
+      primaryKeyInfo: {
+        colName: "entityId",
+        colType: (Entity.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
+    food: {
+      tableName: "food" as const,
+      rowType: Food.getTypeScriptAlgebraicType(),
+      primaryKey: "entityId",
+      primaryKeyInfo: {
+        colName: "entityId",
+        colType: (Food.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
     message: {
       tableName: "message" as const,
       rowType: Message.getTypeScriptAlgebraicType(),
@@ -72,6 +115,10 @@ const REMOTE_MODULE = {
     client_connected: {
       reducerName: "client_connected",
       argsType: ClientConnected.getTypeScriptAlgebraicType(),
+    },
+    debug: {
+      reducerName: "debug",
+      argsType: Debug.getTypeScriptAlgebraicType(),
     },
     identity_disconnected: {
       reducerName: "identity_disconnected",
@@ -116,6 +163,7 @@ const REMOTE_MODULE = {
 // A type representing all the possible variants of a reducer.
 export type Reducer = never
 | { name: "ClientConnected", args: ClientConnected }
+| { name: "Debug", args: Debug }
 | { name: "IdentityDisconnected", args: IdentityDisconnected }
 | { name: "SendMessage", args: SendMessage }
 | { name: "SetName", args: SetName }
@@ -130,6 +178,18 @@ export class RemoteReducers {
 
   removeOnClientConnected(callback: (ctx: ReducerEventContext) => void) {
     this.connection.offReducer("client_connected", callback);
+  }
+
+  debug() {
+    this.connection.callReducer("debug", new Uint8Array(0), this.setCallReducerFlags.debugFlags);
+  }
+
+  onDebug(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.onReducer("debug", callback);
+  }
+
+  removeOnDebug(callback: (ctx: ReducerEventContext) => void) {
+    this.connection.offReducer("debug", callback);
   }
 
   onIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
@@ -175,6 +235,11 @@ export class RemoteReducers {
 }
 
 export class SetReducerFlags {
+  debugFlags: __CallReducerFlags = 'FullUpdate';
+  debug(flags: __CallReducerFlags) {
+    this.debugFlags = flags;
+  }
+
   sendMessageFlags: __CallReducerFlags = 'FullUpdate';
   sendMessage(flags: __CallReducerFlags) {
     this.sendMessageFlags = flags;
@@ -189,6 +254,21 @@ export class SetReducerFlags {
 
 export class RemoteTables {
   constructor(private connection: __DbConnectionImpl) {}
+
+  get circle(): CircleTableHandle<'circle'> {
+    // clientCache is a private property
+    return new CircleTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Circle>(REMOTE_MODULE.tables.circle));
+  }
+
+  get entity(): EntityTableHandle<'entity'> {
+    // clientCache is a private property
+    return new EntityTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Entity>(REMOTE_MODULE.tables.entity));
+  }
+
+  get food(): FoodTableHandle<'food'> {
+    // clientCache is a private property
+    return new FoodTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Food>(REMOTE_MODULE.tables.food));
+  }
 
   get message(): MessageTableHandle<'message'> {
     // clientCache is a private property

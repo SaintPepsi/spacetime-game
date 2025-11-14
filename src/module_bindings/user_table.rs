@@ -82,6 +82,7 @@ impl<'ctx> __sdk::Table for UserTableHandle<'ctx> {
 pub(super) fn register_table(client_cache: &mut __sdk::ClientCache<super::RemoteModule>) {
     let _table = client_cache.get_or_make_table::<User>("user");
     _table.add_unique_constraint::<__sdk::Identity>("identity", |row| &row.identity);
+    _table.add_unique_constraint::<i32>("player_id", |row| &row.player_id);
 }
 pub struct UserUpdateCallbackId(__sdk::CallbackId);
 
@@ -139,6 +140,36 @@ impl<'ctx> UserIdentityUnique<'ctx> {
     /// Find the subscribed row whose `identity` column value is equal to `col_val`,
     /// if such a row is present in the client cache.
     pub fn find(&self, col_val: &__sdk::Identity) -> Option<User> {
+        self.imp.find(col_val)
+    }
+}
+
+/// Access to the `player_id` unique index on the table `user`,
+/// which allows point queries on the field of the same name
+/// via the [`UserPlayerIdUnique::find`] method.
+///
+/// Users are encouraged not to explicitly reference this type,
+/// but to directly chain method calls,
+/// like `ctx.db.user().player_id().find(...)`.
+pub struct UserPlayerIdUnique<'ctx> {
+    imp: __sdk::UniqueConstraintHandle<User, i32>,
+    phantom: std::marker::PhantomData<&'ctx super::RemoteTables>,
+}
+
+impl<'ctx> UserTableHandle<'ctx> {
+    /// Get a handle on the `player_id` unique index on the table `user`.
+    pub fn player_id(&self) -> UserPlayerIdUnique<'ctx> {
+        UserPlayerIdUnique {
+            imp: self.imp.get_unique_constraint::<i32>("player_id"),
+            phantom: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'ctx> UserPlayerIdUnique<'ctx> {
+    /// Find the subscribed row whose `player_id` column value is equal to `col_val`,
+    /// if such a row is present in the client cache.
+    pub fn find(&self, col_val: &i32) -> Option<User> {
         self.imp.find(col_val)
     }
 }

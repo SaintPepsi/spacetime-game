@@ -6,7 +6,15 @@
 #![allow(unused, clippy::all)]
 use spacetimedb_sdk::__codegen::{self as __sdk, __lib, __sats, __ws};
 
+pub mod circle_table;
+pub mod circle_type;
 pub mod client_connected_reducer;
+pub mod db_vector_2_type;
+pub mod debug_reducer;
+pub mod entity_table;
+pub mod entity_type;
+pub mod food_table;
+pub mod food_type;
 pub mod identity_disconnected_reducer;
 pub mod message_table;
 pub mod message_type;
@@ -15,9 +23,17 @@ pub mod set_name_reducer;
 pub mod user_table;
 pub mod user_type;
 
+pub use circle_table::*;
+pub use circle_type::Circle;
 pub use client_connected_reducer::{
     client_connected, set_flags_for_client_connected, ClientConnectedCallbackId,
 };
+pub use db_vector_2_type::DbVector2;
+pub use debug_reducer::{debug, set_flags_for_debug, DebugCallbackId};
+pub use entity_table::*;
+pub use entity_type::Entity;
+pub use food_table::*;
+pub use food_type::Food;
 pub use identity_disconnected_reducer::{
     identity_disconnected, set_flags_for_identity_disconnected, IdentityDisconnectedCallbackId,
 };
@@ -37,6 +53,7 @@ pub use user_type::User;
 
 pub enum Reducer {
     ClientConnected,
+    Debug,
     IdentityDisconnected,
     SendMessage { text: String },
     SetName { name: String },
@@ -50,6 +67,7 @@ impl __sdk::Reducer for Reducer {
     fn reducer_name(&self) -> &'static str {
         match self {
             Reducer::ClientConnected => "client_connected",
+            Reducer::Debug => "debug",
             Reducer::IdentityDisconnected => "identity_disconnected",
             Reducer::SendMessage { .. } => "send_message",
             Reducer::SetName { .. } => "set_name",
@@ -63,6 +81,11 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
             "client_connected" => Ok(__sdk::parse_reducer_args::<
                 client_connected_reducer::ClientConnectedArgs,
             >("client_connected", &value.args)?
+            .into()),
+            "debug" => Ok(__sdk::parse_reducer_args::<debug_reducer::DebugArgs>(
+                "debug",
+                &value.args,
+            )?
             .into()),
             "identity_disconnected" => Ok(__sdk::parse_reducer_args::<
                 identity_disconnected_reducer::IdentityDisconnectedArgs,
@@ -94,6 +117,9 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
 #[allow(non_snake_case)]
 #[doc(hidden)]
 pub struct DbUpdate {
+    circle: __sdk::TableUpdate<Circle>,
+    entity: __sdk::TableUpdate<Entity>,
+    food: __sdk::TableUpdate<Food>,
     message: __sdk::TableUpdate<Message>,
     user: __sdk::TableUpdate<User>,
 }
@@ -104,6 +130,15 @@ impl TryFrom<__ws::DatabaseUpdate<__ws::BsatnFormat>> for DbUpdate {
         let mut db_update = DbUpdate::default();
         for table_update in raw.tables {
             match &table_update.table_name[..] {
+                "circle" => db_update
+                    .circle
+                    .append(circle_table::parse_table_update(table_update)?),
+                "entity" => db_update
+                    .entity
+                    .append(entity_table::parse_table_update(table_update)?),
+                "food" => db_update
+                    .food
+                    .append(food_table::parse_table_update(table_update)?),
                 "message" => db_update
                     .message
                     .append(message_table::parse_table_update(table_update)?),
@@ -136,6 +171,15 @@ impl __sdk::DbUpdate for DbUpdate {
     ) -> AppliedDiff<'_> {
         let mut diff = AppliedDiff::default();
 
+        diff.circle = cache
+            .apply_diff_to_table::<Circle>("circle", &self.circle)
+            .with_updates_by_pk(|row| &row.entity_id);
+        diff.entity = cache
+            .apply_diff_to_table::<Entity>("entity", &self.entity)
+            .with_updates_by_pk(|row| &row.entity_id);
+        diff.food = cache
+            .apply_diff_to_table::<Food>("food", &self.food)
+            .with_updates_by_pk(|row| &row.entity_id);
         diff.message = cache.apply_diff_to_table::<Message>("message", &self.message);
         diff.user = cache
             .apply_diff_to_table::<User>("user", &self.user)
@@ -149,6 +193,9 @@ impl __sdk::DbUpdate for DbUpdate {
 #[allow(non_snake_case)]
 #[doc(hidden)]
 pub struct AppliedDiff<'r> {
+    circle: __sdk::TableAppliedDiff<'r, Circle>,
+    entity: __sdk::TableAppliedDiff<'r, Entity>,
+    food: __sdk::TableAppliedDiff<'r, Food>,
     message: __sdk::TableAppliedDiff<'r, Message>,
     user: __sdk::TableAppliedDiff<'r, User>,
 }
@@ -163,6 +210,9 @@ impl<'r> __sdk::AppliedDiff<'r> for AppliedDiff<'r> {
         event: &EventContext,
         callbacks: &mut __sdk::DbCallbacks<RemoteModule>,
     ) {
+        callbacks.invoke_table_row_callbacks::<Circle>("circle", &self.circle, event);
+        callbacks.invoke_table_row_callbacks::<Entity>("entity", &self.entity, event);
+        callbacks.invoke_table_row_callbacks::<Food>("food", &self.food, event);
         callbacks.invoke_table_row_callbacks::<Message>("message", &self.message, event);
         callbacks.invoke_table_row_callbacks::<User>("user", &self.user, event);
     }
@@ -755,6 +805,9 @@ impl __sdk::SpacetimeModule for RemoteModule {
     type SubscriptionHandle = SubscriptionHandle;
 
     fn register_tables(client_cache: &mut __sdk::ClientCache<Self>) {
+        circle_table::register_table(client_cache);
+        entity_table::register_table(client_cache);
+        food_table::register_table(client_cache);
         message_table::register_table(client_cache);
         user_table::register_table(client_cache);
     }

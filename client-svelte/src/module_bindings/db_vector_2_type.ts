@@ -28,44 +28,40 @@ import {
   type TableHandle as __TableHandle,
 } from "spacetimedb";
 
-export type User = {
-  identity: __Identity,
-  playerId: number,
-  name: string | undefined,
-  online: boolean,
+export type DbVector2 = {
+  x: number,
+  y: number,
 };
-let _cached_User_type_value: __AlgebraicTypeType | null = null;
+let _cached_DbVector2_type_value: __AlgebraicTypeType | null = null;
 
 /**
  * An object for generated helper functions.
  */
-export const User = {
+export const DbVector2 = {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    if (_cached_User_type_value) return _cached_User_type_value;
-    _cached_User_type_value = __AlgebraicTypeValue.Product({ elements: [] });
-    _cached_User_type_value.value.elements.push(
-      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
-      { name: "playerId", algebraicType: __AlgebraicTypeValue.I32 },
-      { name: "name", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
-      { name: "online", algebraicType: __AlgebraicTypeValue.Bool },
+    if (_cached_DbVector2_type_value) return _cached_DbVector2_type_value;
+    _cached_DbVector2_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_DbVector2_type_value.value.elements.push(
+      { name: "x", algebraicType: __AlgebraicTypeValue.F32 },
+      { name: "y", algebraicType: __AlgebraicTypeValue.F32 },
     );
-    return _cached_User_type_value;
+    return _cached_DbVector2_type_value;
   },
 
-  serialize(writer: __BinaryWriter, value: User): void {
-    __AlgebraicTypeValue.serializeValue(writer, User.getTypeScriptAlgebraicType(), value);
+  serialize(writer: __BinaryWriter, value: DbVector2): void {
+    __AlgebraicTypeValue.serializeValue(writer, DbVector2.getTypeScriptAlgebraicType(), value);
   },
 
-  deserialize(reader: __BinaryReader): User {
-    return __AlgebraicTypeValue.deserializeValue(reader, User.getTypeScriptAlgebraicType());
+  deserialize(reader: __BinaryReader): DbVector2 {
+    return __AlgebraicTypeValue.deserializeValue(reader, DbVector2.getTypeScriptAlgebraicType());
   },
 
 }
 
-export default User;
+export default DbVector2;
 
 

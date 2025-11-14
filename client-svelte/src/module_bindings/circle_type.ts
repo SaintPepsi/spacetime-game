@@ -27,45 +27,51 @@ import {
   type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
   type TableHandle as __TableHandle,
 } from "spacetimedb";
+import { DbVector2 } from "./db_vector_2_type";
+// Mark import as potentially unused
+declare type __keep_DbVector2 = DbVector2;
 
-export type User = {
-  identity: __Identity,
+
+export type Circle = {
+  entityId: number,
   playerId: number,
-  name: string | undefined,
-  online: boolean,
+  direction: DbVector2,
+  speed: number,
+  lastSplitTime: __Timestamp,
 };
-let _cached_User_type_value: __AlgebraicTypeType | null = null;
+let _cached_Circle_type_value: __AlgebraicTypeType | null = null;
 
 /**
  * An object for generated helper functions.
  */
-export const User = {
+export const Circle = {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    if (_cached_User_type_value) return _cached_User_type_value;
-    _cached_User_type_value = __AlgebraicTypeValue.Product({ elements: [] });
-    _cached_User_type_value.value.elements.push(
-      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
+    if (_cached_Circle_type_value) return _cached_Circle_type_value;
+    _cached_Circle_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_Circle_type_value.value.elements.push(
+      { name: "entityId", algebraicType: __AlgebraicTypeValue.I32 },
       { name: "playerId", algebraicType: __AlgebraicTypeValue.I32 },
-      { name: "name", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
-      { name: "online", algebraicType: __AlgebraicTypeValue.Bool },
+      { name: "direction", algebraicType: DbVector2.getTypeScriptAlgebraicType() },
+      { name: "speed", algebraicType: __AlgebraicTypeValue.F32 },
+      { name: "lastSplitTime", algebraicType: __AlgebraicTypeValue.createTimestampType() },
     );
-    return _cached_User_type_value;
+    return _cached_Circle_type_value;
   },
 
-  serialize(writer: __BinaryWriter, value: User): void {
-    __AlgebraicTypeValue.serializeValue(writer, User.getTypeScriptAlgebraicType(), value);
+  serialize(writer: __BinaryWriter, value: Circle): void {
+    __AlgebraicTypeValue.serializeValue(writer, Circle.getTypeScriptAlgebraicType(), value);
   },
 
-  deserialize(reader: __BinaryReader): User {
-    return __AlgebraicTypeValue.deserializeValue(reader, User.getTypeScriptAlgebraicType());
+  deserialize(reader: __BinaryReader): Circle {
+    return __AlgebraicTypeValue.deserializeValue(reader, Circle.getTypeScriptAlgebraicType());
   },
 
 }
 
-export default User;
+export default Circle;
 
 

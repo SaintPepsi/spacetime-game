@@ -4,15 +4,18 @@
 #![allow(unused, clippy::all)]
 use spacetimedb_sdk::__codegen::{self as __sdk, __lib, __sats, __ws};
 
+use super::db_vector_2_type::DbVector2;
+
 #[derive(__lib::ser::Serialize, __lib::de::Deserialize, Clone, PartialEq, Debug)]
 #[sats(crate = __lib)]
-pub struct User {
-    pub identity: __sdk::Identity,
+pub struct Circle {
+    pub entity_id: i32,
     pub player_id: i32,
-    pub name: Option<String>,
-    pub online: bool,
+    pub direction: DbVector2,
+    pub speed: f32,
+    pub last_split_time: __sdk::Timestamp,
 }
 
-impl __sdk::InModule for User {
+impl __sdk::InModule for Circle {
     type Module = super::RemoteModule;
 }

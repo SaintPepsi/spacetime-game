@@ -1,9 +1,12 @@
-use spacetimedb::{table, reducer, Table, ReducerContext, Identity, Timestamp};
+use spacetimedb::{table, reducer, Table, ReducerContext, Identity, Timestamp, SpacetimeType};
 
 #[table(name = user, public)]
 pub struct User {
     #[primary_key]
     identity: Identity,
+    #[unique]
+    #[auto_inc]
+    player_id: i32,
     name: Option<String>,
     online: bool,
 }
@@ -92,6 +95,7 @@ pub fn client_connected(ctx: &ReducerContext) -> Result<(), String> {
             name: None,
             identity: ctx.sender,
             online: true,
+            player_id: 0, // will be set by auto_inc
         });
     }
 
@@ -114,3 +118,42 @@ pub fn identity_disconnected(ctx: &ReducerContext) {
 }
 
 
+#[reducer]
+pub fn debug(ctx: &ReducerContext) -> Result<(), String> {
+    log::debug!("This reducer was called by {}.", ctx.sender);
+    Ok(())
+}
+
+
+#[derive(SpacetimeType, Clone, Debug)]
+pub struct DbVector2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+#[table(name = entity, public)]
+#[derive(Debug, Clone)]
+pub struct Entity {
+    #[auto_inc]
+    #[primary_key]
+    pub entity_id: i32,
+    pub position: DbVector2,
+    pub mass: i32,
+}
+
+#[spacetimedb::table(name = circle, public)]
+pub struct Circle {
+    #[primary_key]
+    pub entity_id: i32,
+    #[index(btree)]
+    pub player_id: i32,
+    pub direction: DbVector2,
+    pub speed: f32,
+    pub last_split_time: Timestamp,
+}
+
+#[spacetimedb::table(name = food, public)]
+pub struct Food {
+    #[primary_key]
+    pub entity_id: i32,
+}

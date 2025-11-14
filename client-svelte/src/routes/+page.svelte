@@ -1,5 +1,6 @@
 <script>
 	import ChangeName from '$lib/components/ChangeName.svelte';
+	import DebugButton from '$lib/components/DebugButton.svelte';
 	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
 </script>
 
@@ -9,3 +10,5 @@
 <TotalOnlinePlayers />
 
 <ChangeName />
+
+<DebugButton />

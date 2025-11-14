@@ -16,7 +16,7 @@
 
 {#each userData.rows as user (user.identity.toHexString())}
 	<div class="player">
-		{user.identity} - {user.name} - online: {user.online}
+		{user.identity} - {user.name} - Player ID: {user.playerId} - online: {user.online}
 	</div>
 {/each}
 
