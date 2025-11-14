@@ -1,7 +1,14 @@
 import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
-import type { TableCache } from 'spacetimedb';
+import type { DbConnectionImpl, TableCache } from 'spacetimedb';
 import { untrack } from 'svelte';
-import type { DbConnection } from '../../module_bindings';
+
+// Interface that can be augmented via module declaration (like TanStack Router)
+export interface Register {
+	// connection: YourCustomDbConnection
+}
+
+// Use the registered connection type, falling back to DbConnectionImpl if not registered
+type Connection = Register extends { connection: infer T } ? T : DbConnectionImpl;
 
 export interface UseQueryCallbacks<RowType> {
 	onInsert?: (row: RowType) => void;
@@ -130,8 +137,8 @@ export type ColumnsFromRow<R> = {
 }[keyof R] &
 	string;
 
-export type RowTypes<TableName extends keyof DbConnection['db']> = Parameters<
-	DbConnection['db'][TableName]['tableCache']['update']
+export type RowTypes<TableName extends keyof Connection['db']> = Parameters<
+	Connection['db'][TableName]['tableCache']['update']
 >[2];
 
 /**
@@ -160,7 +167,7 @@ export type RowTypes<TableName extends keyof DbConnection['db']> = Parameters<
  * ```
  */
 export class TableQuery<
-	TableName extends keyof DbConnection['db'],
+	TableName extends keyof Connection['db'],
 	RowType extends RowTypes<TableName>
 > {
 	// Reactive state using $state rune
@@ -168,27 +175,28 @@ export class TableQuery<
 	#subscribeApplied = $state<boolean>(false);
 
 	// Non-reactive internal state
-	#client: DbConnection;
+	#client: Connection;
 	#tableName: TableName;
 	#whereClause: Expr<ColumnsFromRow<RowType>> | undefined;
 	#callbacks: UseQueryCallbacks<RowType> | undefined;
 	#query: string;
 	#latestTransactionEvent: any = null;
 	#unsubscribe: (() => void) | null = null;
-	#tableUnsubscribers: Array<() => void> = [];
+	#tableUnSubscribers: Array<() => void> = [];
 
 	constructor(
 		tableName: TableName,
 		whereClause?: Expr<ColumnsFromRow<RowType>>,
 		callbacks?: UseQueryCallbacks<RowType>
 	) {
-		this.#client = SpacetimeDB.getContext<DbConnection>();
+		this.#client = SpacetimeDB.getContext<Connection>();
 		this.#tableName = tableName;
 		this.#whereClause = whereClause;
 		this.#callbacks = callbacks;
 
 		this.#query =
-			`SELECT * FROM ${tableName}` + (whereClause ? ` WHERE ${toString(whereClause)}` : '');
+			`SELECT * FROM ${tableName as string}` +
+			(whereClause ? ` WHERE ${toString(whereClause)}` : '');
 
 		// Initialize subscription in constructor
 		this.#setupSubscription();
@@ -215,7 +223,7 @@ export class TableQuery<
 	 */
 	#computeSnapshot(): readonly RowType[] {
 		const table = this.#client.db[
-			this.#tableName as keyof DbConnection['db']
+			this.#tableName as keyof Connection['db']
 		] as unknown as TableCache<RowType>;
 
 		if (this.#whereClause) {
@@ -258,7 +266,7 @@ export class TableQuery<
 
 	#setupTableListeners(): void {
 		const table = this.#client.db[
-			this.#tableName as keyof DbConnection['db']
+			this.#tableName as keyof Connection['db']
 		] as unknown as TableCache<RowType>;
 
 		const onInsert = (ctx: any, row: RowType) => {
@@ -316,7 +324,7 @@ export class TableQuery<
 		table.onUpdate?.(onUpdate);
 
 		// Store cleanup functions
-		this.#tableUnsubscribers.push(
+		this.#tableUnSubscribers.push(
 			() => table.removeOnInsert(onInsert),
 			() => table.removeOnDelete(onDelete),
 			() => table.removeOnUpdate?.(onUpdate)
@@ -329,8 +337,8 @@ export class TableQuery<
 	 */
 	destroy(): void {
 		this.#unsubscribe?.();
-		this.#tableUnsubscribers.forEach((unsub) => unsub());
-		this.#tableUnsubscribers = [];
+		this.#tableUnSubscribers.forEach((unsubscribe) => unsubscribe());
+		this.#tableUnSubscribers = [];
 	}
 }
 
@@ -339,7 +347,7 @@ export class TableQuery<
  * This uses $effect internally to handle lifecycle
  */
 export function useTable<
-	TableName extends keyof DbConnection['db'],
+	TableName extends keyof Connection['db'],
 	RowType extends RowTypes<TableName>
 >(
 	tableName: TableName,
