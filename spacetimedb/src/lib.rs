@@ -69,10 +69,20 @@ fn validate_message(text: String) -> Result<String, String> {
 }
 
 
+fn is_identity_already_connected(ctx: &ReducerContext) -> bool {
+    ctx.db.user().identity().find(ctx.sender).iter().any(|f| f.online)
+}
+
 
 #[reducer(client_connected)]
 // called when a client connects to a spacetimeDB database
-pub fn client_connected(ctx: &ReducerContext) {
+pub fn client_connected(ctx: &ReducerContext) -> Result<(), String> {
+    
+    let already_connected = is_identity_already_connected(ctx);
+    if already_connected {
+        return Err("ALREADY_CONNECTED".to_string());
+    }
+    
     if let Some(user) = ctx.db.user().identity().find(ctx.sender) {
         log::info!("User reconnected: {:?}", ctx.sender);
         ctx.db.user().identity().update(User {online: true, ..user});
@@ -84,15 +94,23 @@ pub fn client_connected(ctx: &ReducerContext) {
             online: true,
         });
     }
+
+    Ok(())
 }
 
 
 #[reducer(client_disconnected)]
 // called when a client disconnects from a spacetimeDB database
 pub fn identity_disconnected(ctx: &ReducerContext) {
+    log::info!("Client disconnecting: {:?}", ctx.sender);
     if let Some(user) = ctx.db.user().identity().find(ctx.sender) {
         ctx.db.user().identity().update(User { online: false, ..user });
     } else {
         log::warn!("Disconnected identity not found in user table: {:?}", ctx.sender);
     }
+
+    let already_connected = is_identity_already_connected(ctx);
+    log::info!("Client disconnected: {:?}, still connected: {}", ctx.sender, already_connected);
 }
+
+

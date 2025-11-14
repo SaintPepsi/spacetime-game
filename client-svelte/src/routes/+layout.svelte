@@ -21,7 +21,9 @@
 			});
 		};
 
-		const onDisconnect = () => {
+		const onDisconnect = (ctx: ErrorContext, error?: Error | undefined) => {
+			console.log('error', error);
+			console.log('ctx', ctx);
 			SpacetimeDB.status.set('disconnected');
 			console.log('Disconnected from SpacetimeDB');
 		};
@@ -56,7 +58,9 @@
 	<info> Connecting to SpacetimeDB... </info>
 {/if}
 {#if $status === 'disconnected'}
-	<warning> Disconnected from SpacetimeDB. </warning>
+	<warning>
+		Disconnected from SpacetimeDB. Could you already be connected from another tab or device?</warning
+	>
 {/if}
 {#if $status === 'error'}
 	<error> An error occurred while connecting to SpacetimeDB. </error>
