@@ -26,7 +26,6 @@
 	let player = $derived(
 		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
 	);
-	$inspect('player.playerId', player?.playerId);
 
 	function handlePlayerColourChange(oldRow: Player, newRow: Player) {
 		// console.log('Player oldRow, newRow', oldRow, newRow);
@@ -210,9 +209,14 @@
 	});
 
 	let totalEntities = $derived(entities.rows.length);
+	let totalPlayers = $derived(playerData.rows.length);
 </script>
 
-<code> Total Entities: {totalEntities} </code>
+<code>
+	Total Entities: {totalEntities}<br />
+	Total Players: {totalPlayers}
+</code>
+<code> </code>
 
 <style>
 	code {

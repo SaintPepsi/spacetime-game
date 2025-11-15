@@ -49,6 +49,9 @@
 	<!-- <PlayerColourChanger /> -->
 	<!-- <DebugButton /> -->
 
+	<view>
+		<Canvas {onCreate} resolution={1} />
+	</view>
 	{#if sceneContext}
 		<PixiJSContext scene={sceneContext}>
 			<Arena stage={sceneContext.camera.container}>
@@ -57,10 +60,6 @@
 			<HandlePlayerInput />
 		</PixiJSContext>
 	{/if}
-
-	<view>
-		<Canvas {onCreate} resolution={1} />
-	</view>
 	{#if player && !playerCircle}
 		<StartScreen />
 	{/if}
