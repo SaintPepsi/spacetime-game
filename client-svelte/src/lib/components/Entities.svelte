@@ -14,6 +14,20 @@
 	const [getSceneContext] = sceneContext;
 	const { app, camera } = getSceneContext();
 
+	let client = SpacetimeDB.getContext();
+
+	let playerData = new TableQuery('player', void 0, {
+		onUpdate: (oldRow, newRow) => {
+			handlePlayerColourChange(oldRow, newRow);
+			handlePlayerNameChange(oldRow, newRow);
+		}
+	});
+
+	let player = $derived(
+		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
+	);
+	$inspect('player.playerId', player?.playerId);
+
 	function handlePlayerColourChange(oldRow: Player, newRow: Player) {
 		// console.log('Player oldRow, newRow', oldRow, newRow);
 
@@ -46,13 +60,6 @@
 			entity.playerNameTag.text = newRow.name || 'Unknown';
 		}
 	}
-
-	let playerData = new TableQuery('player', void 0, {
-		onUpdate: (oldRow, newRow) => {
-			handlePlayerColourChange(oldRow, newRow);
-			handlePlayerNameChange(oldRow, newRow);
-		}
-	});
 
 	function createClientCircle(data: Circle) {
 		const player = playerData.rows.find((p) => p.playerId === data.playerId);
@@ -96,7 +103,6 @@
 		onUpdate: (oldRow, newRow) => {
 			// console.log('Entity oldRow, newRow', oldRow, newRow);
 
-			console.log('newRow', newRow);
 			const entity = circlesDictionary[newRow.entityId];
 			if (!entity) return;
 
@@ -120,20 +126,25 @@
 		}
 	});
 
+	function handleCircleInsert(row: Circle) {
+		// console.log('circle data inserted:', row);
+
+		const { entityId } = row;
+
+		const existingCircle = circlesDictionary[entityId];
+		if (existingCircle) return;
+
+		const clientCircle = createClientCircle(row);
+
+		circlesDictionary[entityId] = clientCircle;
+
+		arena.addChild(clientCircle.playerContainer);
+	}
+
 	let circleData = new TableQuery('circle', void 0, {
 		onInsert: (row) => {
 			// console.log('circle data inserted:', row);
-
-			const { entityId } = row;
-
-			const existingCircle = circlesDictionary[entityId];
-			if (existingCircle) return;
-
-			const clientCircle = createClientCircle(row);
-
-			circlesDictionary[entityId] = clientCircle;
-
-			arena.addChild(clientCircle.playerContainer);
+			handleCircleInsert(row);
 		},
 
 		onDelete: (row) => {
@@ -156,11 +167,11 @@
 		}
 	});
 
-	let client = SpacetimeDB.getContext();
-
-	let player = $derived(
-		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
-	);
+	$effect(() => {
+		circleData.rows.forEach((row) => {
+			handleCircleInsert(row);
+		});
+	});
 
 	let playerCircle = $derived(
 		circleData.rows.find((circle) => circle.playerId === player?.playerId)
@@ -177,13 +188,10 @@
 	});
 
 	$effect(() => {
-		function handleGraphicsTicker(ticker: Ticker) {
+		const handleGraphicsTicker = (ticker: Ticker) => {
 			// Update graphics if needed
 
-			for (const circle of circleData.rows) {
-				const entity = circlesDictionary[circle.entityId];
-				if (!entity) return;
-
+			for (const entity of Object.values(circlesDictionary)) {
 				entity.playerContainer.position.add(
 					new Point(
 						(entity.targetPosition.x - entity.playerContainer.position.x) * 0.1 * ticker.deltaTime,
@@ -192,7 +200,7 @@
 					entity.playerContainer.position
 				);
 			}
-		}
+		};
 
 		app.ticker.add(handleGraphicsTicker);
 
@@ -209,5 +217,6 @@
 <style>
 	code {
 		position: fixed;
+		color: white;
 	}
 </style>
