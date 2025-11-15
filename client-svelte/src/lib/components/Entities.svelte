@@ -166,11 +166,11 @@
 		}
 	});
 
-	$effect(() => {
-		circleData.rows.forEach((row) => {
-			handleCircleInsert(row);
-		});
-	});
+	// $effect(() => {
+	// 	circleData.rows.forEach((row) => {
+	// 		handleCircleInsert(row);
+	// 	});
+	// });
 
 	let playerCircle = $derived(
 		circleData.rows.find((circle) => circle.playerId === player?.playerId)

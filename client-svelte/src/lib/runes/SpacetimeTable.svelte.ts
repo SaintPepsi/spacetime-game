@@ -1,6 +1,5 @@
 import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 import type { DbConnectionImpl, TableCache } from 'spacetimedb';
-import { untrack } from 'svelte';
 
 // Interface that can be augmented via module declaration (like TanStack Router)
 export interface Register {
@@ -237,7 +236,7 @@ export class TableQuery<
 	 */
 	#updateSnapshot(): void {
 		// Use untrack to prevent infinite loops if computeSnapshot accesses reactive state
-		this.#rows = untrack(() => this.#computeSnapshot());
+		this.#rows = this.#computeSnapshot();
 	}
 
 	#setupSubscription(): void {

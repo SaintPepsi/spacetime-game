@@ -15,7 +15,7 @@
 	let currentColour = $derived(player?.color || '#ffffff');
 </script>
 
-<DialogModal isOpen>
+<DialogModal isOpen preventCloseOnOutsideClick>
 	<form
 		onsubmit={(e) => {
 			e.preventDefault();
