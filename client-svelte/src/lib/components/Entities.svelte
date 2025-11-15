@@ -205,3 +205,9 @@
 </script>
 
 <code> Total Entities: {totalEntities} </code>
+
+<style>
+	code {
+		position: fixed;
+	}
+</style>

@@ -6,12 +6,9 @@
 	import { Camera } from '$lib/Camera';
 	import Arena from '$lib/components/Arena.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
-	import ChangeName from '$lib/components/ChangeName.svelte';
-	import DebugButton from '$lib/components/DebugButton.svelte';
 	import Entities from '$lib/components/Entities.svelte';
 	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
-	import PlayerColourChanger from '$lib/components/PlayerColourChanger.svelte';
-	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
+	import StartScreen from '$lib/components/StartScreen.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
@@ -46,15 +43,13 @@
 </script>
 
 <main>
-	<TotalOnlinePlayers />
+	<!-- <TotalOnlinePlayers /> -->
 
-	<ChangeName />
-	<PlayerColourChanger />
-	<DebugButton />
+	<!-- <ChangeName /> -->
+	<!-- <PlayerColourChanger /> -->
+	<!-- <DebugButton /> -->
 
 	{#if sceneContext}
-		<p>Scene context initialized</p>
-
 		<PixiJSContext scene={sceneContext}>
 			<Arena stage={sceneContext.camera.container}>
 				<Entities />
@@ -63,12 +58,12 @@
 		</PixiJSContext>
 	{/if}
 
-	{#if player && !playerCircle}
-		<button onclick={() => client.reducers.enterGame()}>Join Game</button>
-	{/if}
 	<view>
 		<Canvas {onCreate} resolution={1} />
 	</view>
+	{#if player && !playerCircle}
+		<StartScreen />
+	{/if}
 </main>
 
 <style>

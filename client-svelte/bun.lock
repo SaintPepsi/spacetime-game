@@ -6,6 +6,7 @@
       "dependencies": {
         "@pixi/devtools": "^2.0.1",
         "@pixi/math-extras": "^7.4.3",
+        "clsx": "^2.1.1",
         "es-toolkit": "^1.41.0",
         "pixi.js": "^8.14.1",
         "runed": "^0.36.0",
