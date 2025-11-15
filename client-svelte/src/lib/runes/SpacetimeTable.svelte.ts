@@ -150,7 +150,7 @@ export type RowTypes<TableName extends keyof Connection['db']> = Parameters<
  * @example
  * ```svelte
  * <script>
- *   const userTable = new TableQuery(client, 'users', where(eq('isActive', true)), {
+ *   const userTable = new TableQuery('users', where(eq('isActive', true)), {
  *     onInsert: (row) => console.log('Inserted:', row),
  *     onDelete: (row) => console.log('Deleted:', row),
  *     onUpdate: (oldRow, newRow) => console.log('Updated:', oldRow, newRow),

@@ -6,8 +6,24 @@
 	import Entities from '$lib/components/Entities.svelte';
 	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
+	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
+	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 
 	let sceneContext = $state<BaseScene | null>(null);
+
+	let client = SpacetimeDB.getContext();
+
+	let playerData = new TableQuery('player');
+
+	let player = $derived(
+		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
+	);
+
+	let circleData = new TableQuery('circle');
+
+	let playerCircle = $derived(
+		circleData.rows.find((circle) => circle.playerId === player?.playerId)
+	);
 
 	async function onCreate(canvasContainer: HTMLDivElement) {
 		sceneContext = await createScene(canvasContainer, 1);
@@ -27,6 +43,10 @@
 		<Arena stage={sceneContext.app.stage}>
 			<Entities />
 		</Arena>
+	{/if}
+
+	{#if player && !playerCircle}
+		<button onclick={() => client.reducers.enterGame()}>Join Game</button>
 	{/if}
 	<view>
 		<Canvas {onCreate} />

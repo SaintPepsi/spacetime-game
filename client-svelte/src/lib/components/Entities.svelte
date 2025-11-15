@@ -11,23 +11,52 @@
 
 	let entities = new TableQuery('entity', void 0, {
 		onUpdate: (oldRow, newRow) => {
-			console.log('oldRow, newRow', oldRow, newRow);
+			// console.log('Entity oldRow, newRow', oldRow, newRow);
+
+			const entityGraphic = entitiesDictionary[newRow.entityId];
+			if (!entityGraphic) return;
+			entityGraphic.position.set(newRow.position.x, newRow.position.y);
 		},
 		onDelete: (row) => {
-			console.log('Entity data deleted:', row);
+			// console.log('Entity data deleted:', row);
+
+			const entityGraphic = entitiesDictionary[row.entityId];
+			if (!entityGraphic) return;
+			entityGraphic.destroy();
+			delete entitiesDictionary[row.entityId];
 		},
 		onInsert: (row) => {
-			console.log('Entity data inserted:', row);
+			// console.log('Entity data inserted:', row);
+			// const { entityId, position } = row;
+			// const existingEntity = entitiesDictionary[entityId];
+			// existingEntity?.destroy();
+			// const entityGraphic = new Graphics().circle(0, 0, 10).fill(0x00ff00);
+			// // .endFill();
+			// entityGraphic.position.set(position.x, position.y);
+			// arena.addChild(entityGraphic);
+		}
+	});
 
-			const { entityId, position } = row;
+	new TableQuery('circle', void 0, {
+		onUpdate: (oldRow, newRow) => {
+			// console.log('circle oldRow, newRow', oldRow, newRow);
+		},
+		onDelete: (row) => {
+			const entityGraphic = entitiesDictionary[row.entityId];
+			if (!entityGraphic) return;
+			entityGraphic.destroy();
+			delete entitiesDictionary[row.entityId];
+		},
+		onInsert: (row) => {
+			// console.log('circle data inserted:', row);
+
+			const { entityId } = row;
 
 			const existingEntity = entitiesDictionary[entityId];
-			existingEntity?.destroy();
+			if (existingEntity) return;
 
 			const entityGraphic = new Graphics().circle(0, 0, 10).fill(0x00ff00);
 			// .endFill();
-
-			entityGraphic.position.set(position.x, position.y);
 
 			arena.addChild(entityGraphic);
 		}
