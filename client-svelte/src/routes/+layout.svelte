@@ -81,6 +81,12 @@
 		box-sizing: border-box;
 	}
 
+	:global(body) {
+		width: 100dvw;
+		height: 100dvh;
+		overflow: hidden;
+	}
+
 	error,
 	warning,
 	info {

@@ -39,12 +39,16 @@ import { EnterGame } from "./enter_game_reducer.ts";
 export { EnterGame };
 import { IdentityDisconnected } from "./identity_disconnected_reducer.ts";
 export { IdentityDisconnected };
+import { MoveAllPlayers } from "./move_all_players_reducer.ts";
+export { MoveAllPlayers };
 import { SendMessage } from "./send_message_reducer.ts";
 export { SendMessage };
 import { SetName } from "./set_name_reducer.ts";
 export { SetName };
 import { SpawnFood } from "./spawn_food_reducer.ts";
 export { SpawnFood };
+import { UpdatePlayerInput } from "./update_player_input_reducer.ts";
+export { UpdatePlayerInput };
 
 // Import and reexport all table handle types
 import { CircleTableHandle } from "./circle_table.ts";
@@ -59,6 +63,8 @@ import { LoggedOutPlayerTableHandle } from "./logged_out_player_table.ts";
 export { LoggedOutPlayerTableHandle };
 import { MessageTableHandle } from "./message_table.ts";
 export { MessageTableHandle };
+import { MoveAllPlayersTimerTableHandle } from "./move_all_players_timer_table.ts";
+export { MoveAllPlayersTimerTableHandle };
 import { PlayerTableHandle } from "./player_table.ts";
 export { PlayerTableHandle };
 import { SpawnFoodTimerTableHandle } from "./spawn_food_timer_table.ts";
@@ -77,6 +83,8 @@ import { Food } from "./food_type.ts";
 export { Food };
 import { Message } from "./message_type.ts";
 export { Message };
+import { MoveAllPlayersTimer } from "./move_all_players_timer_type.ts";
+export { MoveAllPlayersTimer };
 import { Player } from "./player_type.ts";
 export { Player };
 import { SpawnFoodTimer } from "./spawn_food_timer_type.ts";
@@ -133,6 +141,15 @@ const REMOTE_MODULE = {
       tableName: "message" as const,
       rowType: Message.getTypeScriptAlgebraicType(),
     },
+    move_all_players_timer: {
+      tableName: "move_all_players_timer" as const,
+      rowType: MoveAllPlayersTimer.getTypeScriptAlgebraicType(),
+      primaryKey: "scheduledId",
+      primaryKeyInfo: {
+        colName: "scheduledId",
+        colType: (MoveAllPlayersTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
+      },
+    },
     player: {
       tableName: "player" as const,
       rowType: Player.getTypeScriptAlgebraicType(),
@@ -169,6 +186,10 @@ const REMOTE_MODULE = {
       reducerName: "identity_disconnected",
       argsType: IdentityDisconnected.getTypeScriptAlgebraicType(),
     },
+    move_all_players: {
+      reducerName: "move_all_players",
+      argsType: MoveAllPlayers.getTypeScriptAlgebraicType(),
+    },
     send_message: {
       reducerName: "send_message",
       argsType: SendMessage.getTypeScriptAlgebraicType(),
@@ -180,6 +201,10 @@ const REMOTE_MODULE = {
     spawn_food: {
       reducerName: "spawn_food",
       argsType: SpawnFood.getTypeScriptAlgebraicType(),
+    },
+    update_player_input: {
+      reducerName: "update_player_input",
+      argsType: UpdatePlayerInput.getTypeScriptAlgebraicType(),
     },
   },
   versionInfo: {
@@ -215,9 +240,11 @@ export type Reducer = never
 | { name: "Debug", args: Debug }
 | { name: "EnterGame", args: EnterGame }
 | { name: "IdentityDisconnected", args: IdentityDisconnected }
+| { name: "MoveAllPlayers", args: MoveAllPlayers }
 | { name: "SendMessage", args: SendMessage }
 | { name: "SetName", args: SetName }
 | { name: "SpawnFood", args: SpawnFood }
+| { name: "UpdatePlayerInput", args: UpdatePlayerInput }
 ;
 
 export class RemoteReducers {
@@ -261,6 +288,22 @@ export class RemoteReducers {
 
   removeOnIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
     this.connection.offReducer("identity_disconnected", callback);
+  }
+
+  moveAllPlayers(timer: MoveAllPlayersTimer) {
+    const __args = { timer };
+    let __writer = new __BinaryWriter(1024);
+    MoveAllPlayers.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("move_all_players", __argsBuffer, this.setCallReducerFlags.moveAllPlayersFlags);
+  }
+
+  onMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
+    this.connection.onReducer("move_all_players", callback);
+  }
+
+  removeOnMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
+    this.connection.offReducer("move_all_players", callback);
   }
 
   sendMessage(text: string) {
@@ -311,6 +354,22 @@ export class RemoteReducers {
     this.connection.offReducer("spawn_food", callback);
   }
 
+  updatePlayerInput(direction: DbVector2) {
+    const __args = { direction };
+    let __writer = new __BinaryWriter(1024);
+    UpdatePlayerInput.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("update_player_input", __argsBuffer, this.setCallReducerFlags.updatePlayerInputFlags);
+  }
+
+  onUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
+    this.connection.onReducer("update_player_input", callback);
+  }
+
+  removeOnUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
+    this.connection.offReducer("update_player_input", callback);
+  }
+
 }
 
 export class SetReducerFlags {
@@ -322,6 +381,11 @@ export class SetReducerFlags {
   enterGameFlags: __CallReducerFlags = 'FullUpdate';
   enterGame(flags: __CallReducerFlags) {
     this.enterGameFlags = flags;
+  }
+
+  moveAllPlayersFlags: __CallReducerFlags = 'FullUpdate';
+  moveAllPlayers(flags: __CallReducerFlags) {
+    this.moveAllPlayersFlags = flags;
   }
 
   sendMessageFlags: __CallReducerFlags = 'FullUpdate';
@@ -337,6 +401,11 @@ export class SetReducerFlags {
   spawnFoodFlags: __CallReducerFlags = 'FullUpdate';
   spawnFood(flags: __CallReducerFlags) {
     this.spawnFoodFlags = flags;
+  }
+
+  updatePlayerInputFlags: __CallReducerFlags = 'FullUpdate';
+  updatePlayerInput(flags: __CallReducerFlags) {
+    this.updatePlayerInputFlags = flags;
   }
 
 }
@@ -372,6 +441,11 @@ export class RemoteTables {
   get message(): MessageTableHandle<'message'> {
     // clientCache is a private property
     return new MessageTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Message>(REMOTE_MODULE.tables.message));
+  }
+
+  get moveAllPlayersTimer(): MoveAllPlayersTimerTableHandle<'move_all_players_timer'> {
+    // clientCache is a private property
+    return new MoveAllPlayersTimerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<MoveAllPlayersTimer>(REMOTE_MODULE.tables.move_all_players_timer));
   }
 
   get player(): PlayerTableHandle<'player'> {

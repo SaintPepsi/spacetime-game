@@ -22,6 +22,9 @@ pub mod identity_disconnected_reducer;
 pub mod logged_out_player_table;
 pub mod message_table;
 pub mod message_type;
+pub mod move_all_players_reducer;
+pub mod move_all_players_timer_table;
+pub mod move_all_players_timer_type;
 pub mod player_table;
 pub mod player_type;
 pub mod send_message_reducer;
@@ -29,6 +32,7 @@ pub mod set_name_reducer;
 pub mod spawn_food_reducer;
 pub mod spawn_food_timer_table;
 pub mod spawn_food_timer_type;
+pub mod update_player_input_reducer;
 
 pub use circle_table::*;
 pub use circle_type::Circle;
@@ -50,6 +54,11 @@ pub use identity_disconnected_reducer::{
 pub use logged_out_player_table::*;
 pub use message_table::*;
 pub use message_type::Message;
+pub use move_all_players_reducer::{
+    move_all_players, set_flags_for_move_all_players, MoveAllPlayersCallbackId,
+};
+pub use move_all_players_timer_table::*;
+pub use move_all_players_timer_type::MoveAllPlayersTimer;
 pub use player_table::*;
 pub use player_type::Player;
 pub use send_message_reducer::{send_message, set_flags_for_send_message, SendMessageCallbackId};
@@ -57,6 +66,9 @@ pub use set_name_reducer::{set_flags_for_set_name, set_name, SetNameCallbackId};
 pub use spawn_food_reducer::{set_flags_for_spawn_food, spawn_food, SpawnFoodCallbackId};
 pub use spawn_food_timer_table::*;
 pub use spawn_food_timer_type::SpawnFoodTimer;
+pub use update_player_input_reducer::{
+    set_flags_for_update_player_input, update_player_input, UpdatePlayerInputCallbackId,
+};
 
 #[derive(Clone, PartialEq, Debug)]
 
@@ -70,9 +82,11 @@ pub enum Reducer {
     Debug,
     EnterGame,
     IdentityDisconnected,
+    MoveAllPlayers { timer: MoveAllPlayersTimer },
     SendMessage { text: String },
     SetName { name: String },
     SpawnFood { timer: SpawnFoodTimer },
+    UpdatePlayerInput { direction: DbVector2 },
 }
 
 impl __sdk::InModule for Reducer {
@@ -86,9 +100,11 @@ impl __sdk::Reducer for Reducer {
             Reducer::Debug => "debug",
             Reducer::EnterGame => "enter_game",
             Reducer::IdentityDisconnected => "identity_disconnected",
+            Reducer::MoveAllPlayers { .. } => "move_all_players",
             Reducer::SendMessage { .. } => "send_message",
             Reducer::SetName { .. } => "set_name",
             Reducer::SpawnFood { .. } => "spawn_food",
+            Reducer::UpdatePlayerInput { .. } => "update_player_input",
         }
     }
 }
@@ -116,6 +132,10 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
                 identity_disconnected_reducer::IdentityDisconnectedArgs,
             >("identity_disconnected", &value.args)?
             .into()),
+            "move_all_players" => Ok(__sdk::parse_reducer_args::<
+                move_all_players_reducer::MoveAllPlayersArgs,
+            >("move_all_players", &value.args)?
+            .into()),
             "send_message" => Ok(
                 __sdk::parse_reducer_args::<send_message_reducer::SendMessageArgs>(
                     "send_message",
@@ -135,6 +155,10 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
                 )?
                 .into(),
             ),
+            "update_player_input" => Ok(__sdk::parse_reducer_args::<
+                update_player_input_reducer::UpdatePlayerInputArgs,
+            >("update_player_input", &value.args)?
+            .into()),
             unknown => {
                 Err(
                     __sdk::InternalError::unknown_name("reducer", unknown, "ReducerCallInfo")
@@ -155,6 +179,7 @@ pub struct DbUpdate {
     food: __sdk::TableUpdate<Food>,
     logged_out_player: __sdk::TableUpdate<Player>,
     message: __sdk::TableUpdate<Message>,
+    move_all_players_timer: __sdk::TableUpdate<MoveAllPlayersTimer>,
     player: __sdk::TableUpdate<Player>,
     spawn_food_timer: __sdk::TableUpdate<SpawnFoodTimer>,
 }
@@ -183,6 +208,9 @@ impl TryFrom<__ws::DatabaseUpdate<__ws::BsatnFormat>> for DbUpdate {
                 "message" => db_update
                     .message
                     .append(message_table::parse_table_update(table_update)?),
+                "move_all_players_timer" => db_update.move_all_players_timer.append(
+                    move_all_players_timer_table::parse_table_update(table_update)?,
+                ),
                 "player" => db_update
                     .player
                     .append(player_table::parse_table_update(table_update)?),
@@ -231,6 +259,12 @@ impl __sdk::DbUpdate for DbUpdate {
             .apply_diff_to_table::<Player>("logged_out_player", &self.logged_out_player)
             .with_updates_by_pk(|row| &row.identity);
         diff.message = cache.apply_diff_to_table::<Message>("message", &self.message);
+        diff.move_all_players_timer = cache
+            .apply_diff_to_table::<MoveAllPlayersTimer>(
+                "move_all_players_timer",
+                &self.move_all_players_timer,
+            )
+            .with_updates_by_pk(|row| &row.scheduled_id);
         diff.player = cache
             .apply_diff_to_table::<Player>("player", &self.player)
             .with_updates_by_pk(|row| &row.identity);
@@ -252,6 +286,7 @@ pub struct AppliedDiff<'r> {
     food: __sdk::TableAppliedDiff<'r, Food>,
     logged_out_player: __sdk::TableAppliedDiff<'r, Player>,
     message: __sdk::TableAppliedDiff<'r, Message>,
+    move_all_players_timer: __sdk::TableAppliedDiff<'r, MoveAllPlayersTimer>,
     player: __sdk::TableAppliedDiff<'r, Player>,
     spawn_food_timer: __sdk::TableAppliedDiff<'r, SpawnFoodTimer>,
 }
@@ -276,6 +311,11 @@ impl<'r> __sdk::AppliedDiff<'r> for AppliedDiff<'r> {
             event,
         );
         callbacks.invoke_table_row_callbacks::<Message>("message", &self.message, event);
+        callbacks.invoke_table_row_callbacks::<MoveAllPlayersTimer>(
+            "move_all_players_timer",
+            &self.move_all_players_timer,
+            event,
+        );
         callbacks.invoke_table_row_callbacks::<Player>("player", &self.player, event);
         callbacks.invoke_table_row_callbacks::<SpawnFoodTimer>(
             "spawn_food_timer",
@@ -878,6 +918,7 @@ impl __sdk::SpacetimeModule for RemoteModule {
         food_table::register_table(client_cache);
         logged_out_player_table::register_table(client_cache);
         message_table::register_table(client_cache);
+        move_all_players_timer_table::register_table(client_cache);
         player_table::register_table(client_cache);
         spawn_food_timer_table::register_table(client_cache);
     }

@@ -6,7 +6,7 @@ dev *ARGS:
 
 # Publish to local server (pass extra args like: just publish --delete-data)
 publish *ARGS:
-    spacetime publish --server local spacetime-game {{ARGS}}
+    spacetime publish --server local --project-path spacetimedb spacetime-game {{ARGS}}
 
 logs *ARGS:
     spacetime logs --server local c2005b8fef3c783369ebe10ff8542e468df456a29aedcc42dcb4e26c49edca6c --follow

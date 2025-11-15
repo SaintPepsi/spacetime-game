@@ -1,15 +1,22 @@
+<script module lang="ts">
+	export type Scene = BaseScene & { camera: Camera };
+</script>
+
 <script lang="ts">
+	import { Camera } from '$lib/Camera';
 	import Arena from '$lib/components/Arena.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
 	import ChangeName from '$lib/components/ChangeName.svelte';
 	import DebugButton from '$lib/components/DebugButton.svelte';
 	import Entities from '$lib/components/Entities.svelte';
+	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
 	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import PixiJSContext from './SceneContext.svelte';
 
-	let sceneContext = $state<BaseScene | null>(null);
+	let sceneContext = $state<Scene | null>(null);
 
 	let client = SpacetimeDB.getContext();
 
@@ -26,7 +33,14 @@
 	);
 
 	async function onCreate(canvasContainer: HTMLDivElement) {
-		sceneContext = await createScene(canvasContainer, 1);
+		let scene = await createScene(canvasContainer, 1);
+
+		const camera = new Camera(scene.app);
+
+		sceneContext = {
+			...scene,
+			camera
+		};
 	}
 </script>
 
@@ -40,9 +54,12 @@
 	{#if sceneContext}
 		<p>Scene context initialized</p>
 
-		<Arena stage={sceneContext.app.stage}>
-			<Entities />
-		</Arena>
+		<PixiJSContext scene={sceneContext}>
+			<Arena stage={sceneContext.camera.container}>
+				<Entities />
+			</Arena>
+			<HandlePlayerInput />
+		</PixiJSContext>
 	{/if}
 
 	{#if player && !playerCircle}
@@ -55,6 +72,7 @@
 
 <style>
 	main {
+		overflow: hidden;
 		display: flex;
 		width: 100dvw;
 		height: 100dvh;
