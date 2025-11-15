@@ -17,14 +17,16 @@ pub struct SpawnFoodTimer {
 
 #[table(name = player, public)]
 #[table(name = logged_out_player)]
-#[derive(Debug, Clone)]
+#[derive( Debug, Clone)]
 pub struct Player {
     #[primary_key]
     identity: Identity,
     #[unique]
     #[auto_inc]
+
     player_id: i32,
     name: Option<String>,
+    color: Option<String>,
 }
 
 #[table(name = message, public)]
@@ -44,6 +46,17 @@ pub fn set_name(ctx: &ReducerContext, name: String) -> Result<(), String> {
         Ok(())
     } else {
         Err("Cannot set name for unknown player".to_string())
+    }
+}
+
+
+#[reducer]
+pub fn set_color(ctx: &ReducerContext, color: String) -> Result<(), String> {
+    if let Some(player) = ctx.db.player().identity().find(ctx.sender) {
+        ctx.db.player().identity().update(Player { color: Some(color), ..player });
+        Ok(())
+    } else {
+        Err("Cannot set color for unknown player".to_string())
     }
 }
 
@@ -118,7 +131,6 @@ pub fn move_all_players(ctx: &ReducerContext, _timer: MoveAllPlayersTimer) -> Re
         let max = world_size as f32 - circle_radius;
         circle_entity.position.x = new_pos.x.clamp(min, max);
         circle_entity.position.y = new_pos.y.clamp(min, max);
-        log::info!("Moving circle entity {:?} to position {:?}", circle_entity.entity_id, circle_entity.position);
         ctx.db.entity().entity_id().update(circle_entity);
     }
 
@@ -200,6 +212,7 @@ pub fn client_connected(ctx: &ReducerContext) -> Result<(), String> {
             identity: ctx.sender,
             player_id: 0,
             name: None,
+            color: None,
         })?;
     }
 

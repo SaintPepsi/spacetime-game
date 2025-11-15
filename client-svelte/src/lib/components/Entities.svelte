@@ -2,8 +2,8 @@
 	import { arenaContext } from '$lib/components/Arena.svelte';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
-	import { Graphics, Ticker } from 'pixi.js';
-	import type { Circle } from '../../module_bindings';
+	import { BitmapText, Container, Graphics, Point, Ticker } from 'pixi.js';
+	import type { Circle, Player } from '../../module_bindings';
 	import { sceneContext } from '../../routes/SceneContext.svelte';
 
 	let circlesDictionary = $state<Record<number, ClientCircle>>({});
@@ -14,21 +14,89 @@
 	const [getSceneContext] = sceneContext;
 	const { app, camera } = getSceneContext();
 
+	function handlePlayerColourChange(oldRow: Player, newRow: Player) {
+		// console.log('Player oldRow, newRow', oldRow, newRow);
+
+		if (oldRow.color === newRow.color) return;
+
+		// Update the color of the player's circle
+		const playerCircles = circleData.rows.filter((circle) => circle.playerId === newRow.playerId);
+
+		for (const circle of playerCircles) {
+			const entity = circlesDictionary[circle.entityId];
+			if (!entity) continue;
+
+			const colorHex = parseInt(newRow.color?.replace('#', '') || 'ffffff', 16);
+			entity.graphic.clear().circle(0, 0, 10).fill(colorHex);
+		}
+	}
+
+	function handlePlayerNameChange(oldRow: Player, newRow: Player) {
+		// console.log('Player oldRow, newRow', oldRow, newRow);
+
+		if (oldRow.name === newRow.name) return;
+
+		// Update the name tag of the player's circle
+		const playerCircles = circleData.rows.filter((circle) => circle.playerId === newRow.playerId);
+
+		for (const circle of playerCircles) {
+			const entity = circlesDictionary[circle.entityId];
+			if (!entity) continue;
+
+			entity.playerNameTag.text = newRow.name || 'Unknown';
+		}
+	}
+
+	let playerData = new TableQuery('player', void 0, {
+		onUpdate: (oldRow, newRow) => {
+			handlePlayerColourChange(oldRow, newRow);
+			handlePlayerNameChange(oldRow, newRow);
+		}
+	});
+
 	function createClientCircle(data: Circle) {
-		const graphic = new Graphics().circle(0, 0, 10).fill(0x00ff00);
+		const player = playerData.rows.find((p) => p.playerId === data.playerId);
+		const colorHex = parseInt(player?.color?.replace('#', '') || 'ffffff', 16);
+
+		const playerContainer = new Container();
+		playerContainer.pivot.set(0.5, 0.5);
+		const graphic = new Graphics().circle(0, 0, 10).fill(colorHex);
+
+		const playerNameTag = new BitmapText({
+			text: player?.name || 'Unknown',
+			style: {
+				fontFamily: 'Weiholmir_regular',
+				fontSize: 7,
+				lineHeight: 10
+
+				// fill: '#ffcc00',
+			},
+			anchor: { x: 0.5, y: 2 }
+		});
+		const pointer = new Graphics().rect(0, -1, 10, 2).fill('0xffffff');
+
+		pointer.rotation = Math.atan2(data.direction.y, data.direction.x);
+		playerContainer.addChild(graphic);
+		playerContainer.addChild(playerNameTag);
+		playerContainer.addChild(pointer);
 
 		return {
 			...data,
 			targetPosition: { x: 0, y: 0 },
-			graphic
+			playerContainer,
+			graphic,
+			pointer,
+			playerNameTag
 		};
 	}
+
 	type ClientCircle = ReturnType<typeof createClientCircle>;
 
 	let entities = new TableQuery('entity', void 0, {
 		onUpdate: (oldRow, newRow) => {
 			// console.log('Entity oldRow, newRow', oldRow, newRow);
 
+			console.log('newRow', newRow);
 			const entity = circlesDictionary[newRow.entityId];
 			if (!entity) return;
 
@@ -39,7 +107,7 @@
 
 			const entity = circlesDictionary[row.entityId];
 			if (!entity) return;
-			entity.graphic.destroy();
+			entity.playerContainer.destroy();
 			delete circlesDictionary[row.entityId];
 		},
 
@@ -47,7 +115,7 @@
 			// console.log('Entity data inserted:', row);
 			const entity = circlesDictionary[row.entityId];
 			if (!entity) return;
-			entity.graphic.position.set(row.position.x, row.position.y);
+			entity.playerContainer.position.set(row.position.x, row.position.y);
 			entity.targetPosition = { x: row.position.x, y: row.position.y };
 		}
 	});
@@ -65,26 +133,30 @@
 
 			circlesDictionary[entityId] = clientCircle;
 
-			arena.addChild(clientCircle.graphic);
+			arena.addChild(clientCircle.playerContainer);
+		},
+
+		onDelete: (row) => {
+			// console.log('circle data deleted:', row);
+
+			const entity = circlesDictionary[row.entityId];
+			if (!entity) return;
+			entity.playerContainer.destroy();
+			delete circlesDictionary[row.entityId];
+		},
+
+		onUpdate: (oldRow, newRow) => {
+			// console.log('circle oldRow, newRow', oldRow, newRow);
+
+			const entity = circlesDictionary[newRow.entityId];
+			if (!entity) return;
+
+			const angle = Math.atan2(newRow.direction.y, newRow.direction.x);
+			entity.pointer.rotation = angle;
 		}
 	});
 
-	function handleGraphicsTicker(ticker: Ticker) {
-		// Update graphics if needed
-
-		for (const circle of circleData.rows) {
-			const entity = circlesDictionary[circle.entityId];
-			if (!entity) return;
-
-			entity.graphic.position.x +=
-				(entity.targetPosition.x - entity.graphic.position.x) * 0.1 * ticker.deltaTime;
-			entity.graphic.position.y +=
-				(entity.targetPosition.y - entity.graphic.position.y) * 0.1 * ticker.deltaTime;
-		}
-	}
 	let client = SpacetimeDB.getContext();
-
-	let playerData = new TableQuery('player');
 
 	let player = $derived(
 		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
@@ -97,7 +169,7 @@
 	$effect(() => {
 		const entity = circlesDictionary[playerCircle?.entityId || -1];
 		if (!entity) return;
-		const unfollow = camera.follow(entity.graphic);
+		const unfollow = camera.follow(entity.playerContainer);
 
 		return () => {
 			unfollow();
@@ -105,6 +177,23 @@
 	});
 
 	$effect(() => {
+		function handleGraphicsTicker(ticker: Ticker) {
+			// Update graphics if needed
+
+			for (const circle of circleData.rows) {
+				const entity = circlesDictionary[circle.entityId];
+				if (!entity) return;
+
+				entity.playerContainer.position.add(
+					new Point(
+						(entity.targetPosition.x - entity.playerContainer.position.x) * 0.1 * ticker.deltaTime,
+						(entity.targetPosition.y - entity.playerContainer.position.y) * 0.1 * ticker.deltaTime
+					),
+					entity.playerContainer.position
+				);
+			}
+		}
+
 		app.ticker.add(handleGraphicsTicker);
 
 		return () => {

@@ -28,44 +28,37 @@ import {
   type TableHandle as __TableHandle,
 } from "spacetimedb";
 
-export type Player = {
-  identity: __Identity,
-  playerId: number,
-  name: string | undefined,
-  color: string | undefined,
+export type SetColor = {
+  color: string,
 };
-let _cached_Player_type_value: __AlgebraicTypeType | null = null;
+let _cached_SetColor_type_value: __AlgebraicTypeType | null = null;
 
 /**
  * An object for generated helper functions.
  */
-export const Player = {
+export const SetColor = {
   /**
   * A function which returns this type represented as an AlgebraicType.
   * This function is derived from the AlgebraicType used to generate this type.
   */
   getTypeScriptAlgebraicType(): __AlgebraicTypeType {
-    if (_cached_Player_type_value) return _cached_Player_type_value;
-    _cached_Player_type_value = __AlgebraicTypeValue.Product({ elements: [] });
-    _cached_Player_type_value.value.elements.push(
-      { name: "identity", algebraicType: __AlgebraicTypeValue.createIdentityType() },
-      { name: "playerId", algebraicType: __AlgebraicTypeValue.I32 },
-      { name: "name", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
-      { name: "color", algebraicType: __AlgebraicTypeValue.createOptionType(__AlgebraicTypeValue.String) },
+    if (_cached_SetColor_type_value) return _cached_SetColor_type_value;
+    _cached_SetColor_type_value = __AlgebraicTypeValue.Product({ elements: [] });
+    _cached_SetColor_type_value.value.elements.push(
+      { name: "color", algebraicType: __AlgebraicTypeValue.String },
     );
-    return _cached_Player_type_value;
+    return _cached_SetColor_type_value;
   },
 
-  serialize(writer: __BinaryWriter, value: Player): void {
-    __AlgebraicTypeValue.serializeValue(writer, Player.getTypeScriptAlgebraicType(), value);
+  serialize(writer: __BinaryWriter, value: SetColor): void {
+    __AlgebraicTypeValue.serializeValue(writer, SetColor.getTypeScriptAlgebraicType(), value);
   },
 
-  deserialize(reader: __BinaryReader): Player {
-    return __AlgebraicTypeValue.deserializeValue(reader, Player.getTypeScriptAlgebraicType());
+  deserialize(reader: __BinaryReader): SetColor {
+    return __AlgebraicTypeValue.deserializeValue(reader, SetColor.getTypeScriptAlgebraicType());
   },
 
 }
 
-export default Player;
-
+export default SetColor;
 

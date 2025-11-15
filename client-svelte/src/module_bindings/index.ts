@@ -43,6 +43,8 @@ import { MoveAllPlayers } from "./move_all_players_reducer.ts";
 export { MoveAllPlayers };
 import { SendMessage } from "./send_message_reducer.ts";
 export { SendMessage };
+import { SetColor } from "./set_color_reducer.ts";
+export { SetColor };
 import { SetName } from "./set_name_reducer.ts";
 export { SetName };
 import { SpawnFood } from "./spawn_food_reducer.ts";
@@ -194,6 +196,10 @@ const REMOTE_MODULE = {
       reducerName: "send_message",
       argsType: SendMessage.getTypeScriptAlgebraicType(),
     },
+    set_color: {
+      reducerName: "set_color",
+      argsType: SetColor.getTypeScriptAlgebraicType(),
+    },
     set_name: {
       reducerName: "set_name",
       argsType: SetName.getTypeScriptAlgebraicType(),
@@ -242,6 +248,7 @@ export type Reducer = never
 | { name: "IdentityDisconnected", args: IdentityDisconnected }
 | { name: "MoveAllPlayers", args: MoveAllPlayers }
 | { name: "SendMessage", args: SendMessage }
+| { name: "SetColor", args: SetColor }
 | { name: "SetName", args: SetName }
 | { name: "SpawnFood", args: SpawnFood }
 | { name: "UpdatePlayerInput", args: UpdatePlayerInput }
@@ -322,6 +329,22 @@ export class RemoteReducers {
     this.connection.offReducer("send_message", callback);
   }
 
+  setColor(color: string) {
+    const __args = { color };
+    let __writer = new __BinaryWriter(1024);
+    SetColor.serialize(__writer, __args);
+    let __argsBuffer = __writer.getBuffer();
+    this.connection.callReducer("set_color", __argsBuffer, this.setCallReducerFlags.setColorFlags);
+  }
+
+  onSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
+    this.connection.onReducer("set_color", callback);
+  }
+
+  removeOnSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
+    this.connection.offReducer("set_color", callback);
+  }
+
   setName(name: string) {
     const __args = { name };
     let __writer = new __BinaryWriter(1024);
@@ -391,6 +414,11 @@ export class SetReducerFlags {
   sendMessageFlags: __CallReducerFlags = 'FullUpdate';
   sendMessage(flags: __CallReducerFlags) {
     this.sendMessageFlags = flags;
+  }
+
+  setColorFlags: __CallReducerFlags = 'FullUpdate';
+  setColor(flags: __CallReducerFlags) {
+    this.setColorFlags = flags;
   }
 
   setNameFlags: __CallReducerFlags = 'FullUpdate';

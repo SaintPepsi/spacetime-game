@@ -28,6 +28,7 @@ pub mod move_all_players_timer_type;
 pub mod player_table;
 pub mod player_type;
 pub mod send_message_reducer;
+pub mod set_color_reducer;
 pub mod set_name_reducer;
 pub mod spawn_food_reducer;
 pub mod spawn_food_timer_table;
@@ -62,6 +63,7 @@ pub use move_all_players_timer_type::MoveAllPlayersTimer;
 pub use player_table::*;
 pub use player_type::Player;
 pub use send_message_reducer::{send_message, set_flags_for_send_message, SendMessageCallbackId};
+pub use set_color_reducer::{set_color, set_flags_for_set_color, SetColorCallbackId};
 pub use set_name_reducer::{set_flags_for_set_name, set_name, SetNameCallbackId};
 pub use spawn_food_reducer::{set_flags_for_spawn_food, spawn_food, SpawnFoodCallbackId};
 pub use spawn_food_timer_table::*;
@@ -84,6 +86,7 @@ pub enum Reducer {
     IdentityDisconnected,
     MoveAllPlayers { timer: MoveAllPlayersTimer },
     SendMessage { text: String },
+    SetColor { color: String },
     SetName { name: String },
     SpawnFood { timer: SpawnFoodTimer },
     UpdatePlayerInput { direction: DbVector2 },
@@ -102,6 +105,7 @@ impl __sdk::Reducer for Reducer {
             Reducer::IdentityDisconnected => "identity_disconnected",
             Reducer::MoveAllPlayers { .. } => "move_all_players",
             Reducer::SendMessage { .. } => "send_message",
+            Reducer::SetColor { .. } => "set_color",
             Reducer::SetName { .. } => "set_name",
             Reducer::SpawnFood { .. } => "spawn_food",
             Reducer::UpdatePlayerInput { .. } => "update_player_input",
@@ -139,6 +143,13 @@ impl TryFrom<__ws::ReducerCallInfo<__ws::BsatnFormat>> for Reducer {
             "send_message" => Ok(
                 __sdk::parse_reducer_args::<send_message_reducer::SendMessageArgs>(
                     "send_message",
+                    &value.args,
+                )?
+                .into(),
+            ),
+            "set_color" => Ok(
+                __sdk::parse_reducer_args::<set_color_reducer::SetColorArgs>(
+                    "set_color",
                     &value.args,
                 )?
                 .into(),

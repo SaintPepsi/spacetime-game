@@ -10,6 +10,7 @@
 	import DebugButton from '$lib/components/DebugButton.svelte';
 	import Entities from '$lib/components/Entities.svelte';
 	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
+	import PlayerColourChanger from '$lib/components/PlayerColourChanger.svelte';
 	import TotalOnlinePlayers from '$lib/components/TotalOnlinePlayers.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
@@ -48,7 +49,7 @@
 	<TotalOnlinePlayers />
 
 	<ChangeName />
-
+	<PlayerColourChanger />
 	<DebugButton />
 
 	{#if sceneContext}
@@ -66,7 +67,7 @@
 		<button onclick={() => client.reducers.enterGame()}>Join Game</button>
 	{/if}
 	<view>
-		<Canvas {onCreate} />
+		<Canvas {onCreate} resolution={1} />
 	</view>
 </main>
 

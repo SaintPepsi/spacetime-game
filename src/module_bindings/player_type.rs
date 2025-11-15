@@ -10,6 +10,7 @@ pub struct Player {
     pub identity: __sdk::Identity,
     pub player_id: i32,
     pub name: Option<String>,
+    pub color: Option<String>,
 }
 
 impl __sdk::InModule for Player {
