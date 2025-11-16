@@ -1,9 +1,9 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import { DbConnection, type ErrorContext } from '@module_bindings';
 	import type { Identity } from 'spacetimedb';
 	import { onMount } from 'svelte';
-	import { DbConnection, type ErrorContext } from '../module_bindings';
 	import SpacetimeDBContext from './SpacetimeDBContext.svelte';
 
 	let connection = $state(<DbConnection | null>null);

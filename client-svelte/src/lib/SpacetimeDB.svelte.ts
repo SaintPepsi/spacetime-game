@@ -1,7 +1,7 @@
+import { DbConnection } from '@module_bindings';
 import { PersistedState } from 'runed';
 import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
-import { DbConnection } from '../module_bindings';
 
 export namespace SpacetimeDB {}
 

@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { ClientCircle } from '$lib/ClientCircle';
+	import { ClientFood } from '$lib/ClientFood';
 	import { arenaContext } from '$lib/components/Arena.svelte';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
-	import { BitmapText, Container, Graphics, Point, Ticker } from 'pixi.js';
-	import type { Circle, Player } from '../../module_bindings';
-	import { sceneContext } from '../../routes/SceneContext.svelte';
+	import type { Circle, Entity, Food, Player } from '@module_bindings';
+	import { sceneContext } from '@routes/SceneContext.svelte';
+	import { Ticker } from 'pixi.js';
 
+	// Entity dictionaries
 	let circlesDictionary = $state<Record<number, ClientCircle>>({});
+	let foodDictionary = $state<Record<number, ClientFood>>({});
 
+	// Context
 	const [getArenaContext] = arenaContext;
 	const arena = getArenaContext();
 
@@ -16,6 +21,13 @@
 
 	let client = SpacetimeDB.getContext();
 
+	// Config data query (for world size)
+	let configData = new TableQuery('config', void 0);
+
+	let config = $derived(configData.rows[0]);
+	let worldSize = $derived(config ? Number(config.worldSize) : 0);
+
+	// Player data query
 	let playerData = new TableQuery('player', void 0, {
 		onUpdate: (oldRow, newRow) => {
 			handlePlayerColourChange(oldRow, newRow);
@@ -27,177 +39,251 @@
 		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
 	);
 
+	/**
+	 * Handle player color changes
+	 */
 	function handlePlayerColourChange(oldRow: Player, newRow: Player) {
-		// console.log('Player oldRow, newRow', oldRow, newRow);
-
 		if (oldRow.color === newRow.color) return;
 
-		// Update the color of the player's circle
+		// Update the color of the player's circles
 		const playerCircles = circleData.rows.filter((circle) => circle.playerId === newRow.playerId);
 
 		for (const circle of playerCircles) {
 			const entity = circlesDictionary[circle.entityId];
-			if (!entity) continue;
+			if (!entity || !newRow.color) continue;
 
-			const colorHex = parseInt(newRow.color?.replace('#', '') || 'ffffff', 16);
-			entity.graphic.clear().circle(0, 0, 10).fill(colorHex);
+			entity.updateColor(newRow.color);
 		}
 	}
 
+	/**
+	 * Handle player name changes
+	 */
 	function handlePlayerNameChange(oldRow: Player, newRow: Player) {
-		// console.log('Player oldRow, newRow', oldRow, newRow);
-
 		if (oldRow.name === newRow.name) return;
 
-		// Update the name tag of the player's circle
+		// Update the name tag of the player's circles
 		const playerCircles = circleData.rows.filter((circle) => circle.playerId === newRow.playerId);
 
 		for (const circle of playerCircles) {
 			const entity = circlesDictionary[circle.entityId];
-			if (!entity) continue;
+			if (!entity || !newRow.name) continue;
 
-			entity.playerNameTag.text = newRow.name || 'Unknown';
+			entity.updateName(newRow.name);
 		}
 	}
 
-	function createClientCircle(data: Circle) {
-		const player = playerData.rows.find((p) => p.playerId === data.playerId);
-		const colorHex = parseInt(player?.color?.replace('#', '') || 'ffffff', 16);
-
-		const playerContainer = new Container();
-		playerContainer.pivot.set(0.5, 0.5);
-		const graphic = new Graphics().circle(0, 0, 10).fill(colorHex);
-
-		const playerNameTag = new BitmapText({
-			text: player?.name || 'Unknown',
-			style: {
-				fontFamily: 'Weiholmir_regular',
-				fontSize: 7,
-				lineHeight: 10
-
-				// fill: '#ffcc00',
-			},
-			anchor: { x: 0.5, y: 2 }
-		});
-		const pointer = new Graphics().rect(0, -1, 10, 2).fill('0xffffff');
-
-		pointer.rotation = Math.atan2(data.direction.y, data.direction.x);
-		playerContainer.addChild(graphic);
-		playerContainer.addChild(playerNameTag);
-		playerContainer.addChild(pointer);
-
-		return {
-			...data,
-			targetPosition: { x: 0, y: 0 },
-			playerContainer,
-			graphic,
-			pointer,
-			playerNameTag
-		};
+	/**
+	 * Create a client circle instance
+	 */
+	function createClientCircle(circleRow: Circle, entityRow: Entity): ClientCircle {
+		const playerRow = playerData.rows.find((p) => p.playerId === circleRow.playerId);
+		return new ClientCircle(circleRow, entityRow, playerRow);
 	}
 
-	type ClientCircle = ReturnType<typeof createClientCircle>;
+	/**
+	 * Create a client food instance
+	 */
+	function createClientFood(foodRow: Food, entityRow: Entity): ClientFood {
+		return new ClientFood(foodRow, entityRow);
+	}
 
-	let entities = new TableQuery('entity', void 0, {
-		onUpdate: (oldRow, newRow) => {
-			// console.log('Entity oldRow, newRow', oldRow, newRow);
+	// Helper function to try creating a circle if both entity and circle data exist
+	function tryCreateCircle(circleRow: Circle, entityRow?: Entity) {
+		const { entityId } = circleRow;
 
-			const entity = circlesDictionary[newRow.entityId];
-			if (!entity) return;
-
-			entity.targetPosition = { x: newRow.position.x, y: newRow.position.y };
-		},
-		onDelete: (row) => {
-			// console.log('Entity data deleted:', row);
-
-			const entity = circlesDictionary[row.entityId];
-			if (!entity) return;
-			entity.playerContainer.destroy();
-			delete circlesDictionary[row.entityId];
-		},
-
-		onInsert: (row) => {
-			// console.log('Entity data inserted:', row);
-			const entity = circlesDictionary[row.entityId];
-			if (!entity) return;
-			entity.playerContainer.position.set(row.position.x, row.position.y);
-			entity.targetPosition = { x: row.position.x, y: row.position.y };
+		// Check if circle already exists
+		if (circlesDictionary[entityId]) {
+			console.log('Circle already exists:', entityId);
+			return;
 		}
-	});
 
-	function handleCircleInsert(row: Circle) {
-		// console.log('circle data inserted:', row);
+		// Find corresponding entity data if not provided
+		if (!entityRow) {
+			entityRow = entities.rows.find((e) => e.entityId === entityId);
+		}
 
-		const { entityId } = row;
+		if (!entityRow) {
+			console.log(
+				'Entity not found for circle:',
+				entityId,
+				'Available entities:',
+				entities.rows.length
+			);
+			return; // Entity not ready yet
+		}
 
-		const existingCircle = circlesDictionary[entityId];
-		if (existingCircle) return;
-
-		const clientCircle = createClientCircle(row);
-
+		console.log('Creating circle:', entityId);
+		// Create client circle
+		const clientCircle = createClientCircle(circleRow, entityRow);
 		circlesDictionary[entityId] = clientCircle;
 
-		arena.addChild(clientCircle.playerContainer);
+		// Add to arena
+		arena.addChild(clientCircle.container);
+		console.log('Circle created and added to arena:', entityId);
 	}
 
+	// Helper function to try creating food if both entity and food data exist
+	function tryCreateFood(foodRow: Food, entityRow?: Entity) {
+		const { entityId } = foodRow;
+
+		// Check if food already exists
+		if (foodDictionary[entityId]) return;
+
+		// Find corresponding entity data if not provided
+		if (!entityRow) {
+			entityRow = entities.rows.find((e) => e.entityId === entityId);
+		}
+
+		if (!entityRow) return; // Entity not ready yet
+
+		// Create client food
+		const clientFood = createClientFood(foodRow, entityRow);
+		foodDictionary[entityId] = clientFood;
+
+		// Add to arena
+		arena.addChild(clientFood.container);
+	}
+
+	// Circle table query
 	let circleData = new TableQuery('circle', void 0, {
 		onInsert: (row) => {
-			// console.log('circle data inserted:', row);
-			handleCircleInsert(row);
+			console.log('Circle inserted:', row.entityId, row);
+			tryCreateCircle(row);
 		},
 
 		onDelete: (row) => {
-			// console.log('circle data deleted:', row);
-
+			console.log('Circle deleted:', row.entityId);
 			const entity = circlesDictionary[row.entityId];
 			if (!entity) return;
-			entity.playerContainer.destroy();
+
+			entity.onDelete({});
 			delete circlesDictionary[row.entityId];
 		},
 
-		onUpdate: (oldRow, newRow) => {
-			// console.log('circle oldRow, newRow', oldRow, newRow);
-
+		onUpdate: (_oldRow, newRow) => {
 			const entity = circlesDictionary[newRow.entityId];
 			if (!entity) return;
 
-			const angle = Math.atan2(newRow.direction.y, newRow.direction.x);
-			entity.pointer.rotation = angle;
+			// Update direction
+			entity.updateDirection(newRow.direction);
 		}
 	});
 
-	// $effect(() => {
-	// 	circleData.rows.forEach((row) => {
-	// 		handleCircleInsert(row);
-	// 	});
-	// });
+	// Food table query
+	let foodData = new TableQuery('food', void 0, {
+		onInsert: (row) => {
+			tryCreateFood(row);
+		},
 
+		onDelete: (row) => {
+			const entity = foodDictionary[row.entityId];
+			if (!entity) return;
+
+			entity.onDelete({});
+			delete foodDictionary[row.entityId];
+		}
+	});
+
+	// Entity table query
+	let entities = new TableQuery('entity', void 0, {
+		onUpdate: (_oldRow, newRow) => {
+			// Update circle entity if it exists
+			const circle = circlesDictionary[newRow.entityId];
+			if (circle) {
+				circle.onEntityUpdated({
+					position: { x: newRow.position.x, y: newRow.position.y },
+					mass: newRow.mass
+				});
+				return;
+			}
+
+			// Update food entity if it exists
+			const food = foodDictionary[newRow.entityId];
+			if (food) {
+				food.onEntityUpdated({
+					position: { x: newRow.position.x, y: newRow.position.y },
+					mass: newRow.mass
+				});
+			}
+		},
+
+		onDelete: (row) => {
+			// Delete circle entity if it exists
+			const circle = circlesDictionary[row.entityId];
+			if (circle) {
+				circle.onDelete({});
+				delete circlesDictionary[row.entityId];
+				return;
+			}
+
+			// Delete food entity if it exists
+			const food = foodDictionary[row.entityId];
+			if (food) {
+				food.onDelete({});
+				delete foodDictionary[row.entityId];
+			}
+		},
+
+		onInsert: (row) => {
+			console.log('Entity inserted:', row.entityId, row);
+
+			// Try to create circle if circle data exists
+			const circleRow = circleData.rows.find((c) => c.entityId === row.entityId);
+			if (circleRow) {
+				console.log('Found matching circle for entity:', row.entityId);
+				// Pass the entity row directly since it's not in entities.rows yet
+				tryCreateCircle(circleRow, row);
+				return;
+			}
+
+			// Try to create food if food data exists
+			const foodRow = foodData.rows.find((f) => f.entityId === row.entityId);
+			if (foodRow) {
+				console.log('Found matching food for entity:', row.entityId);
+				// Pass the entity row directly since it's not in entities.rows yet
+				tryCreateFood(foodRow, row);
+				return;
+			}
+
+			console.log('No matching circle or food found for entity:', row.entityId);
+		}
+	});
+
+	// Player circle (for camera tracking)
 	let playerCircle = $derived(
 		circleData.rows.find((circle) => circle.playerId === player?.playerId)
 	);
 
+	$inspect('circleData', circleData);
+	$inspect('entities', entities);
+	$inspect('playerCircle', playerCircle);
+
+	// Camera follow effect
 	$effect(() => {
 		const entity = circlesDictionary[playerCircle?.entityId || -1];
 		if (!entity) return;
-		const unfollow = camera.follow(entity.playerContainer);
+
+		const unfollow = camera.follow(entity.container);
 
 		return () => {
 			unfollow();
 		};
 	});
 
+	// Animation ticker effect
 	$effect(() => {
 		const handleGraphicsTicker = (ticker: Ticker) => {
-			// Update graphics if needed
+			const deltaTime = ticker.deltaTime / 60; // Convert to seconds
 
-			for (const entity of Object.values(circlesDictionary)) {
-				entity.playerContainer.position.add(
-					new Point(
-						(entity.targetPosition.x - entity.playerContainer.position.x) * 0.1 * ticker.deltaTime,
-						(entity.targetPosition.y - entity.playerContainer.position.y) * 0.1 * ticker.deltaTime
-					),
-					entity.playerContainer.position
-				);
+			// Update all circles
+			for (const circle of Object.values(circlesDictionary)) {
+				circle.tick(deltaTime);
+			}
+
+			// Update all food
+			for (const food of Object.values(foodDictionary)) {
+				food.tick(deltaTime);
 			}
 		};
 
@@ -208,15 +294,20 @@
 		};
 	});
 
+	// Derived stats
 	let totalEntities = $derived(entities.rows.length);
 	let totalPlayers = $derived(playerData.rows.length);
+	let totalCircles = $derived(Object.keys(circlesDictionary).length);
+	let totalFood = $derived(Object.keys(foodDictionary).length);
 </script>
 
 <code>
+	World Size: {worldSize}<br />
 	Total Entities: {totalEntities}<br />
-	Total Players: {totalPlayers}
+	Total Players: {totalPlayers}<br />
+	Total Circles: {totalCircles}<br />
+	Total Food: {totalFood}
 </code>
-<code> </code>
 
 <style>
 	code {

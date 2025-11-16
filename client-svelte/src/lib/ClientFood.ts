@@ -1,6 +1,6 @@
+import { ClientEntity } from '$lib/ClientEntity';
+import type { Entity, Food as FoodData } from '@module_bindings';
 import { Graphics } from 'pixi.js';
-import { ClientEntity } from './ClientEntity';
-import type { Food as FoodData, Entity } from '../module_bindings';
 
 /**
  * ClientFood entity class - represents collectible food items
@@ -26,7 +26,7 @@ export class ClientFood extends ClientEntity {
 		0xa8dadc, // Sky Blue
 		0xf7dc6f, // Gold
 		0xbb8fce, // Lavender
-		0x85c1e2  // Powder Blue
+		0x85c1e2 // Powder Blue
 	];
 
 	constructor(foodData: FoodData, entityData: Entity) {

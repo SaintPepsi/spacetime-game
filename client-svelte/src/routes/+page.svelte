@@ -6,13 +6,13 @@
 	import { Camera } from '$lib/Camera';
 	import Arena from '$lib/components/Arena.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
-	import EntitiesRefactored from '$lib/components/EntitiesRefactored.svelte';
+	import EntitiesRefactored from '$lib/components/Entities.svelte';
 	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
 	import StartScreen from '$lib/components/StartScreen.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
-	import PixiJSContext from './SceneContext.svelte';
+	import PixiJSContext from '@routes/SceneContext.svelte';
 
 	let sceneContext = $state<Scene | null>(null);
 

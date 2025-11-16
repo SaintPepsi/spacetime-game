@@ -1,6 +1,6 @@
+import type { ClientCircle } from '$lib/ClientCircle';
+import type { Player } from '@module_bindings';
 import { Point } from 'pixi.js';
-import type { Player } from '../module_bindings';
-import type { ClientCircle } from './ClientCircle';
 
 /**
  * ClientPlayerPawn class - manages multiple owned circles for a player

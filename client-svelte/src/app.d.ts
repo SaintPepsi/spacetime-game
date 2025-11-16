@@ -1,6 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 
-import type { DbConnection } from './module_bindings';
+import type { DbConnection } from '@module_bindings';
 
 // for information about these interfaces
 declare global {

@@ -1,5 +1,5 @@
+import type { Circle as CircleData, Entity, Player } from '@module_bindings';
 import { BitmapText, Graphics } from 'pixi.js';
-import type { Circle as CircleData, Entity, Player } from '../module_bindings';
 import { ClientEntity } from './ClientEntity';
 
 /**
