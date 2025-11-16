@@ -6,7 +6,7 @@
 	import { Camera } from '$lib/Camera';
 	import Arena from '$lib/components/Arena.svelte';
 	import Canvas from '$lib/components/Canvas.svelte';
-	import Entities from '$lib/components/Entities.svelte';
+	import EntitiesRefactored from '$lib/components/EntitiesRefactored.svelte';
 	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
 	import StartScreen from '$lib/components/StartScreen.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
@@ -55,7 +55,7 @@
 	{#if sceneContext}
 		<PixiJSContext scene={sceneContext}>
 			<Arena stage={sceneContext.camera.container}>
-				<Entities />
+				<EntitiesRefactored />
 			</Arena>
 			<HandlePlayerInput />
 		</PixiJSContext>

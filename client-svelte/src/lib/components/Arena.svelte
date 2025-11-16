@@ -7,7 +7,7 @@
 	import { Container, Graphics, type ContainerChild } from 'pixi.js';
 	import { createContext, type Snippet } from 'svelte';
 
-	let config = new TableQuery('config');
+	let configQuery = new TableQuery('config');
 
 	type Props = {
 		stage: Container;
@@ -16,20 +16,26 @@
 
 	const { stage, children }: Props = $props();
 
-	$inspect('config', config);
-	$inspect('stage', stage);
+	// Get config and world size
+	let config = $derived(configQuery.rows[0]);
+	let worldSize = $derived(config ? Number(config.worldSize) : 1000);
 
-	function createArena() {
-		const arena = new Container();
+	// Create arena and border graphics
+	let arena = $state(new Container());
+	let border = $state(new Graphics());
 
-		const border = new Graphics().rect(0, 0, 1000, 1000).stroke({ width: 2, color: 0xff0000 });
+	// Initialize arena with border
+	$effect(() => {
+		// Add border to arena if not already added
+		if (!arena.children.includes(border)) {
+			arena.addChild(border);
+		}
+	});
 
-		arena.addChild(border);
-
-		return arena;
-	}
-
-	let arena = $state(createArena());
+	// Update border when world size changes
+	$effect(() => {
+		border.clear().rect(0, 0, worldSize, worldSize).stroke({ width: 2, color: 0xff0000 });
+	});
 
 	$effect(() => {
 		stage.addChild(arena);
