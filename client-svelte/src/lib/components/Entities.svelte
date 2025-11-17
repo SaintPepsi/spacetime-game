@@ -98,7 +98,7 @@
 	function createClientCircle(circleRow: Circle, entityRow: Entity): ClientCircle {
 		const owningPlayer = playerData.rows.find((p) => p.playerId === circleRow.playerId);
 
-		const clientCircle = new ClientCircle(circleRow, entityRow, owningPlayer);
+		const clientCircle = new ClientCircle(circleRow, entityRow, owningPlayer, true);
 		const playerPawn = option(playerPawnDictionary.get(circleRow.playerId));
 
 		playerPawn.map((pawn) => {
@@ -292,7 +292,7 @@
 	// Animation ticker effect
 	$effect(() => {
 		const handleGraphicsTicker = (ticker: Ticker) => {
-			const deltaTime = ticker.deltaTime / 60; // Convert to seconds
+			const deltaTime = ticker.deltaTime; // Convert to seconds
 
 			// Update all circles
 			circlesDictionary.forEach((circle) => {

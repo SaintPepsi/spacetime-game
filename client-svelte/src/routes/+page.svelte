@@ -16,6 +16,8 @@
 
 	let sceneContext = $state<Scene | null>(null);
 
+	let resolution = $state(2);
+
 	let client = SpacetimeDB.getContext();
 
 	let playerData = new TableQuery('player');
@@ -31,7 +33,7 @@
 	);
 
 	async function onCreate(canvasContainer: HTMLDivElement) {
-		let scene = await createScene(canvasContainer, 1);
+		let scene = await createScene(canvasContainer, resolution);
 
 		const camera = new Camera(scene.app);
 
@@ -50,7 +52,7 @@
 	<!-- <DebugButton /> -->
 
 	<view>
-		<Canvas {onCreate} resolution={1} />
+		<Canvas {onCreate} {resolution} />
 	</view>
 	{#if sceneContext}
 		<PixiJSContext scene={sceneContext}>

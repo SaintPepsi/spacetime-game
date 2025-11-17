@@ -74,7 +74,7 @@ export class ClientPlayerPawn {
 		let totalMass = 0;
 
 		for (const circle of this.ownedCircles.values()) {
-			const mass = circle.targetScale; // Using targetScale as mass proxy
+			const mass = circle.mass; // Using targetScale as mass proxy
 			totalX += circle.container.position.x * mass;
 			totalY += circle.container.position.y * mass;
 			totalMass += mass;
@@ -92,7 +92,6 @@ export class ClientPlayerPawn {
 	 * Get the center of mass position for camera tracking
 	 */
 	public getCenterOfMass(): Point {
-		console.log('getting centre of mass');
 		// Recalculate before returning to ensure up-to-date position
 		this.updateCenterOfMass();
 		return this.centerOfMass;

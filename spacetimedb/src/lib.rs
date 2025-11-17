@@ -99,7 +99,7 @@ pub struct MoveAllPlayersTimer {
     scheduled_at: ScheduleAt,
 }
 
-const START_PLAYER_SPEED: i32 = 10;
+const START_PLAYER_SPEED: i32 = 1;
 const MINIMUM_SAFE_MASS_RATIO: f32 = 0.85;
 
 fn mass_to_max_move_speed(mass: i32) -> f32 {

@@ -1,6 +1,6 @@
 import type { ClientPlayerPawn } from '$lib/ClientPlayerPawn';
 import type { Circle as CircleData, Entity, Player } from '@module_bindings';
-import { BitmapText, Graphics } from 'pixi.js';
+import { BitmapText, Container, Graphics } from 'pixi.js';
 import { ClientEntity } from './ClientEntity';
 
 /**
@@ -16,14 +16,15 @@ export class ClientCircle extends ClientEntity {
 	// Visual components
 	public graphic: Graphics;
 	public pointer: Graphics;
+	public graphicContainer = new Container();
 	public playerNameTag: BitmapText;
 
 	// Player reference
 	public owner?: ClientPlayerPawn;
 	private playerData?: Player;
 
-	constructor(circleData: CircleData, entityData: Entity, playerData?: Player) {
-		super();
+	constructor(circleData: CircleData, entityData: Entity, playerData?: Player, __debug = false) {
+		super(__debug);
 
 		this.playerId = circleData.playerId;
 		this.direction = { x: circleData.direction.x, y: circleData.direction.y };
@@ -37,6 +38,7 @@ export class ClientCircle extends ClientEntity {
 		});
 
 		// Create visual components
+
 		this.graphic = this.createGraphic(playerData);
 		this.pointer = this.createPointer();
 		this.playerNameTag = this.createNameTag(playerData);
@@ -45,9 +47,10 @@ export class ClientCircle extends ClientEntity {
 		this.container.pivot.set(0.5, 0.5);
 
 		// Add children to container
-		this.container.addChild(this.graphic);
+		this.graphicContainer.addChild(this.graphic);
+		this.graphicContainer.addChild(this.pointer);
+		this.container.addChild(this.graphicContainer);
 		this.container.addChild(this.playerNameTag);
-		this.container.addChild(this.pointer);
 
 		// Set initial pointer rotation
 		this.updatePointerDirection(circleData.direction);
@@ -59,7 +62,7 @@ export class ClientCircle extends ClientEntity {
 	 */
 	private createGraphic(playerData?: Player): Graphics {
 		const colorHex = parseInt(playerData?.color?.replace('#', '') || 'ffffff', 16);
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 		return new Graphics().circle(0, 0, radius).fill(colorHex);
 	}
 
@@ -68,7 +71,7 @@ export class ClientCircle extends ClientEntity {
 	 * Scales with entity radius
 	 */
 	private createPointer(): Graphics {
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 		return new Graphics().rect(0, -1, radius, 2).fill(0xffffff);
 	}
 
@@ -109,7 +112,7 @@ export class ClientCircle extends ClientEntity {
 	 */
 	public updateColor(color: string): void {
 		const colorHex = parseInt(color.replace('#', '') || 'ffffff', 16);
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 		this.graphic.clear().circle(0, 0, radius).fill(colorHex);
 	}
 
@@ -141,7 +144,7 @@ export class ClientCircle extends ClientEntity {
 		super.tick(deltaTime);
 
 		// Update graphic and pointer size based on current scale
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 
 		// Update circle graphic with current color
 		const colorHex = parseInt(this.playerData?.color?.replace('#', '') || 'ffffff', 16);
@@ -151,11 +154,11 @@ export class ClientCircle extends ClientEntity {
 		this.pointer.clear().rect(0, -1, radius, 2).fill(0xffffff);
 		this.pointer.rotation = Math.atan2(this.direction.y, this.direction.x);
 
+		// Interp scale
+		// const newScale = lerp(this.graphicContainer.scale.x, this.mass, 0.2 * deltaTime);
+		// this.graphicContainer.scale.set(newScale);
+
 		// Counter-scale the name tag so it stays the same size
 		// Since the container is scaled, we need to scale the name tag inversely
-		const containerScale = this.container.scale.x;
-		if (containerScale > 0) {
-			this.playerNameTag.scale.set(1 / containerScale);
-		}
 	}
 }

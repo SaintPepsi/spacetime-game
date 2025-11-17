@@ -53,7 +53,7 @@ export class ClientFood extends ClientEntity {
 	private createGraphic(entityId: number): Graphics {
 		const colorIndex = entityId % ClientFood.COLOR_PALETTE.length;
 		const color = ClientFood.COLOR_PALETTE[colorIndex];
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 
 		// Create circle with mass-based radius
 		return new Graphics().circle(0, 0, radius).fill(color);
@@ -64,7 +64,7 @@ export class ClientFood extends ClientEntity {
 	 * Maintains mass-based radius
 	 */
 	public override setColor(color: number): void {
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 		this.graphic.clear().circle(0, 0, radius).fill(color);
 	}
 
@@ -75,7 +75,7 @@ export class ClientFood extends ClientEntity {
 		super.tick(deltaTime);
 
 		// Update graphic size based on current scale
-		const radius = ClientEntity.massToRadius(this.targetScale);
+		const radius = ClientEntity.massToRadius(this.mass);
 		const colorIndex = this.entityId % ClientFood.COLOR_PALETTE.length;
 		const color = ClientFood.COLOR_PALETTE[colorIndex];
 

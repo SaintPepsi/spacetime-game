@@ -1,3 +1,4 @@
+import { lerp } from '$lib/lerp';
 import { Container, Point, Sprite } from 'pixi.js';
 
 // Type definitions matching the C++ structs
@@ -9,27 +10,11 @@ interface EntityType {
 	position: { x: number; y: number };
 	mass: number;
 }
+const START_PLAYER_SPEED = 1;
+const START_PLAYER_MASS = 15;
 
-/**
- * Linear interpolation helper
- */
-function lerp(start: number, end: number, alpha: number): number {
-	return start + (end - start) * alpha;
-}
-
-/**
- * Interpolate float to target value
- */
-function interpolateTo(
-	current: number,
-	target: number,
-	deltaTime: number,
-	interpolateSpeed: number
-): number {
-	const delta = target - current;
-	if (Math.abs(delta) < 0.001) return target;
-	const step = delta * Math.min(deltaTime * interpolateSpeed, 1.0);
-	return current + step;
+function massToMaxMoveSpeed(mass: number): number {
+	return (2.0 * START_PLAYER_SPEED) / (1.0 + Math.sqrt(mass / START_PLAYER_MASS));
 }
 
 /**
@@ -37,14 +22,10 @@ function interpolateTo(
  * Represents a game entity with position interpolation and lifecycle management
  */
 export class ClientEntity {
-	// Protected properties (equivalent to UPROPERTY EditDefaultsOnly)
-	protected lerpTime = 0.0;
-	protected lerpDuration = 0.1;
-
 	// Position interpolation vectors
 	protected lerpStartPosition = new Point(0, 0);
 	protected lerpTargetPosition = new Point(0, 0);
-	targetScale = 1.0;
+	mass = 1.0;
 
 	// Public properties
 	public entityId = 0;
@@ -52,9 +33,7 @@ export class ClientEntity {
 	// Visual container (replaces AActor's visual component)
 	container = new Container();
 
-	constructor() {
-		this.lerpTime = 0.0;
-	}
+	constructor(private __debug = false) {}
 
 	/**
 	 * Called every frame to update the entity
@@ -62,16 +41,22 @@ export class ClientEntity {
 	 * @param deltaTime Time elapsed since last frame in seconds
 	 */
 	public tick(deltaTime: number): void {
+		let speed = 0.2;
 		// Interpolate the position and scale
-		this.lerpTime = Math.min(this.lerpTime + deltaTime, this.lerpDuration);
-		const alpha = this.lerpDuration > 0 ? this.lerpTime / this.lerpDuration : 1.0;
 		// Lerp position
-		this.container.position.x = lerp(this.lerpStartPosition.x, this.lerpTargetPosition.x, alpha);
-		this.container.position.y = lerp(this.lerpStartPosition.y, this.lerpTargetPosition.y, alpha);
+		this.container.position.x = lerp(
+			this.lerpStartPosition.x,
+			this.lerpTargetPosition.x,
+			deltaTime * speed
+		);
 
-		// Interp scale
-		const newScale = interpolateTo(this.container.scale.x, this.targetScale, deltaTime, 8.0);
-		this.container.scale.set(newScale);
+		this.container.position.y = lerp(
+			this.lerpStartPosition.y,
+			this.lerpTargetPosition.y,
+			deltaTime * speed
+		);
+
+		this.lerpStartPosition.set(this.container.position.x, this.container.position.y);
 	}
 
 	/**
@@ -86,7 +71,7 @@ export class ClientEntity {
 		// For now, entityData is passed in as parameter
 		this.lerpStartPosition = new Point(entityData.position.x, entityData.position.y);
 		this.lerpTargetPosition = new Point(entityData.position.x, entityData.position.y);
-		this.targetScale = ClientEntity.massToDiameter(entityData.mass);
+		this.mass = entityData.mass;
 		this.container.scale.set(1.0);
 	}
 
@@ -98,8 +83,7 @@ export class ClientEntity {
 	public onEntityUpdated(newVal: EntityType): void {
 		this.lerpStartPosition = new Point(this.container.position.x, this.container.position.y);
 		this.lerpTargetPosition = new Point(newVal.position.x, newVal.position.y);
-		this.targetScale = ClientEntity.massToDiameter(newVal.mass);
-		this.lerpTime = 0.0;
+		this.mass = newVal.mass;
 	}
 
 	/**
@@ -142,5 +126,10 @@ export class ClientEntity {
 	 */
 	public static massToDiameter(mass: number): number {
 		return ClientEntity.massToRadius(mass) * 2;
+	}
+
+	public static diameterToMass(diameter: number): number {
+		const radius = diameter / 2;
+		return radius * radius;
 	}
 }
