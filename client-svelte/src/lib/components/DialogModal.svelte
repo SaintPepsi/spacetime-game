@@ -196,9 +196,6 @@
 		}
 
 		&--type {
-			&-popup {
-			}
-
 			&-default {
 				.Modal {
 					&__contentWrapper {
