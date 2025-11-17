@@ -6,499 +6,596 @@
 /* eslint-disable */
 /* tslint:disable */
 import {
-  AlgebraicType as __AlgebraicTypeValue,
-  BinaryReader as __BinaryReader,
-  BinaryWriter as __BinaryWriter,
-  ClientCache as __ClientCache,
-  ConnectionId as __ConnectionId,
-  DbConnectionBuilder as __DbConnectionBuilder,
-  DbConnectionImpl as __DbConnectionImpl,
-  Identity as __Identity,
-  SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
-  TableCache as __TableCache,
-  TimeDuration as __TimeDuration,
-  Timestamp as __Timestamp,
-  deepEqual as __deepEqual,
-  type AlgebraicType as __AlgebraicTypeType,
-  type AlgebraicTypeVariants as __AlgebraicTypeVariants,
-  type CallReducerFlags as __CallReducerFlags,
-  type ErrorContextInterface as __ErrorContextInterface,
-  type Event as __Event,
-  type EventContextInterface as __EventContextInterface,
-  type ReducerEventContextInterface as __ReducerEventContextInterface,
-  type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
-  type TableHandle as __TableHandle,
-} from "spacetimedb";
+	AlgebraicType as __AlgebraicTypeValue,
+	BinaryReader as __BinaryReader,
+	BinaryWriter as __BinaryWriter,
+	ClientCache as __ClientCache,
+	ConnectionId as __ConnectionId,
+	DbConnectionBuilder as __DbConnectionBuilder,
+	DbConnectionImpl as __DbConnectionImpl,
+	Identity as __Identity,
+	SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
+	TableCache as __TableCache,
+	TimeDuration as __TimeDuration,
+	Timestamp as __Timestamp,
+	deepEqual as __deepEqual,
+	type AlgebraicType as __AlgebraicTypeType,
+	type AlgebraicTypeVariants as __AlgebraicTypeVariants,
+	type CallReducerFlags as __CallReducerFlags,
+	type ErrorContextInterface as __ErrorContextInterface,
+	type Event as __Event,
+	type EventContextInterface as __EventContextInterface,
+	type ReducerEventContextInterface as __ReducerEventContextInterface,
+	type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+	type TableHandle as __TableHandle
+} from 'spacetimedb';
 
 // Import and reexport all reducer arg types
-import { ClientConnected } from "./client_connected_reducer.ts";
+import { ClientConnected } from './client_connected_reducer.ts';
 export { ClientConnected };
-import { Debug } from "./debug_reducer.ts";
+import { Debug } from './debug_reducer.ts';
 export { Debug };
-import { EnterGame } from "./enter_game_reducer.ts";
+import { EnterGame } from './enter_game_reducer.ts';
 export { EnterGame };
-import { IdentityDisconnected } from "./identity_disconnected_reducer.ts";
+import { IdentityDisconnected } from './identity_disconnected_reducer.ts';
 export { IdentityDisconnected };
-import { MoveAllPlayers } from "./move_all_players_reducer.ts";
+import { MoveAllPlayers } from './move_all_players_reducer.ts';
 export { MoveAllPlayers };
-import { SendMessage } from "./send_message_reducer.ts";
+import { SendMessage } from './send_message_reducer.ts';
 export { SendMessage };
-import { SetColor } from "./set_color_reducer.ts";
+import { SetColor } from './set_color_reducer.ts';
 export { SetColor };
-import { SetName } from "./set_name_reducer.ts";
+import { SetName } from './set_name_reducer.ts';
 export { SetName };
-import { SpawnFood } from "./spawn_food_reducer.ts";
+import { SpawnFood } from './spawn_food_reducer.ts';
 export { SpawnFood };
-import { UpdatePlayerInput } from "./update_player_input_reducer.ts";
+import { UpdatePlayerInput } from './update_player_input_reducer.ts';
 export { UpdatePlayerInput };
 
 // Import and reexport all table handle types
-import { CircleTableHandle } from "./circle_table.ts";
+import { CircleTableHandle } from './circle_table.ts';
 export { CircleTableHandle };
-import { ConfigTableHandle } from "./config_table.ts";
+import { ConfigTableHandle } from './config_table.ts';
 export { ConfigTableHandle };
-import { EntityTableHandle } from "./entity_table.ts";
+import { EntityTableHandle } from './entity_table.ts';
 export { EntityTableHandle };
-import { FoodTableHandle } from "./food_table.ts";
+import { FoodTableHandle } from './food_table.ts';
 export { FoodTableHandle };
-import { LoggedOutPlayerTableHandle } from "./logged_out_player_table.ts";
+import { LoggedOutPlayerTableHandle } from './logged_out_player_table.ts';
 export { LoggedOutPlayerTableHandle };
-import { MessageTableHandle } from "./message_table.ts";
+import { MessageTableHandle } from './message_table.ts';
 export { MessageTableHandle };
-import { MoveAllPlayersTimerTableHandle } from "./move_all_players_timer_table.ts";
+import { MoveAllPlayersTimerTableHandle } from './move_all_players_timer_table.ts';
 export { MoveAllPlayersTimerTableHandle };
-import { PlayerTableHandle } from "./player_table.ts";
+import { PlayerTableHandle } from './player_table.ts';
 export { PlayerTableHandle };
-import { SpawnFoodTimerTableHandle } from "./spawn_food_timer_table.ts";
+import { SpawnFoodTimerTableHandle } from './spawn_food_timer_table.ts';
 export { SpawnFoodTimerTableHandle };
 
 // Import and reexport all types
-import { Circle } from "./circle_type.ts";
+import { Circle } from './circle_type.ts';
 export { Circle };
-import { Config } from "./config_type.ts";
+import { Config } from './config_type.ts';
 export { Config };
-import { DbVector2 } from "./db_vector_2_type.ts";
+import { DbVector2 } from './db_vector_2_type.ts';
 export { DbVector2 };
-import { Entity } from "./entity_type.ts";
+import { Entity } from './entity_type.ts';
 export { Entity };
-import { Food } from "./food_type.ts";
+import { Food } from './food_type.ts';
 export { Food };
-import { Message } from "./message_type.ts";
+import { Message } from './message_type.ts';
 export { Message };
-import { MoveAllPlayersTimer } from "./move_all_players_timer_type.ts";
+import { MoveAllPlayersTimer } from './move_all_players_timer_type.ts';
 export { MoveAllPlayersTimer };
-import { Player } from "./player_type.ts";
+import { Player } from './player_type.ts';
 export { Player };
-import { SpawnFoodTimer } from "./spawn_food_timer_type.ts";
+import { SpawnFoodTimer } from './spawn_food_timer_type.ts';
 export { SpawnFoodTimer };
 
 const REMOTE_MODULE = {
-  tables: {
-    circle: {
-      tableName: "circle" as const,
-      rowType: Circle.getTypeScriptAlgebraicType(),
-      primaryKey: "entityId",
-      primaryKeyInfo: {
-        colName: "entityId",
-        colType: (Circle.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    config: {
-      tableName: "config" as const,
-      rowType: Config.getTypeScriptAlgebraicType(),
-      primaryKey: "id",
-      primaryKeyInfo: {
-        colName: "id",
-        colType: (Config.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    entity: {
-      tableName: "entity" as const,
-      rowType: Entity.getTypeScriptAlgebraicType(),
-      primaryKey: "entityId",
-      primaryKeyInfo: {
-        colName: "entityId",
-        colType: (Entity.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    food: {
-      tableName: "food" as const,
-      rowType: Food.getTypeScriptAlgebraicType(),
-      primaryKey: "entityId",
-      primaryKeyInfo: {
-        colName: "entityId",
-        colType: (Food.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    logged_out_player: {
-      tableName: "logged_out_player" as const,
-      rowType: Player.getTypeScriptAlgebraicType(),
-      primaryKey: "identity",
-      primaryKeyInfo: {
-        colName: "identity",
-        colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    message: {
-      tableName: "message" as const,
-      rowType: Message.getTypeScriptAlgebraicType(),
-    },
-    move_all_players_timer: {
-      tableName: "move_all_players_timer" as const,
-      rowType: MoveAllPlayersTimer.getTypeScriptAlgebraicType(),
-      primaryKey: "scheduledId",
-      primaryKeyInfo: {
-        colName: "scheduledId",
-        colType: (MoveAllPlayersTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    player: {
-      tableName: "player" as const,
-      rowType: Player.getTypeScriptAlgebraicType(),
-      primaryKey: "identity",
-      primaryKeyInfo: {
-        colName: "identity",
-        colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-    spawn_food_timer: {
-      tableName: "spawn_food_timer" as const,
-      rowType: SpawnFoodTimer.getTypeScriptAlgebraicType(),
-      primaryKey: "scheduledId",
-      primaryKeyInfo: {
-        colName: "scheduledId",
-        colType: (SpawnFoodTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value.elements[0].algebraicType,
-      },
-    },
-  },
-  reducers: {
-    client_connected: {
-      reducerName: "client_connected",
-      argsType: ClientConnected.getTypeScriptAlgebraicType(),
-    },
-    debug: {
-      reducerName: "debug",
-      argsType: Debug.getTypeScriptAlgebraicType(),
-    },
-    enter_game: {
-      reducerName: "enter_game",
-      argsType: EnterGame.getTypeScriptAlgebraicType(),
-    },
-    identity_disconnected: {
-      reducerName: "identity_disconnected",
-      argsType: IdentityDisconnected.getTypeScriptAlgebraicType(),
-    },
-    move_all_players: {
-      reducerName: "move_all_players",
-      argsType: MoveAllPlayers.getTypeScriptAlgebraicType(),
-    },
-    send_message: {
-      reducerName: "send_message",
-      argsType: SendMessage.getTypeScriptAlgebraicType(),
-    },
-    set_color: {
-      reducerName: "set_color",
-      argsType: SetColor.getTypeScriptAlgebraicType(),
-    },
-    set_name: {
-      reducerName: "set_name",
-      argsType: SetName.getTypeScriptAlgebraicType(),
-    },
-    spawn_food: {
-      reducerName: "spawn_food",
-      argsType: SpawnFood.getTypeScriptAlgebraicType(),
-    },
-    update_player_input: {
-      reducerName: "update_player_input",
-      argsType: UpdatePlayerInput.getTypeScriptAlgebraicType(),
-    },
-  },
-  versionInfo: {
-    cliVersion: "1.7.0",
-  },
-  // Constructors which are used by the DbConnectionImpl to
-  // extract type information from the generated RemoteModule.
-  //
-  // NOTE: This is not strictly necessary for `eventContextConstructor` because
-  // all we do is build a TypeScript object which we could have done inside the
-  // SDK, but if in the future we wanted to create a class this would be
-  // necessary because classes have methods, so we'll keep it.
-  eventContextConstructor: (imp: __DbConnectionImpl, event: __Event<Reducer>) => {
-    return {
-      ...(imp as DbConnection),
-      event
-    }
-  },
-  dbViewConstructor: (imp: __DbConnectionImpl) => {
-    return new RemoteTables(imp);
-  },
-  reducersConstructor: (imp: __DbConnectionImpl, setReducerFlags: SetReducerFlags) => {
-    return new RemoteReducers(imp, setReducerFlags);
-  },
-  setReducerFlagsConstructor: () => {
-    return new SetReducerFlags();
-  }
-}
+	tables: {
+		circle: {
+			tableName: 'circle' as const,
+			rowType: Circle.getTypeScriptAlgebraicType(),
+			primaryKey: 'entityId',
+			primaryKeyInfo: {
+				colName: 'entityId',
+				colType: (Circle.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		config: {
+			tableName: 'config' as const,
+			rowType: Config.getTypeScriptAlgebraicType(),
+			primaryKey: 'id',
+			primaryKeyInfo: {
+				colName: 'id',
+				colType: (Config.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		entity: {
+			tableName: 'entity' as const,
+			rowType: Entity.getTypeScriptAlgebraicType(),
+			primaryKey: 'entityId',
+			primaryKeyInfo: {
+				colName: 'entityId',
+				colType: (Entity.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		food: {
+			tableName: 'food' as const,
+			rowType: Food.getTypeScriptAlgebraicType(),
+			primaryKey: 'entityId',
+			primaryKeyInfo: {
+				colName: 'entityId',
+				colType: (Food.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		logged_out_player: {
+			tableName: 'logged_out_player' as const,
+			rowType: Player.getTypeScriptAlgebraicType(),
+			primaryKey: 'identity',
+			primaryKeyInfo: {
+				colName: 'identity',
+				colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		message: {
+			tableName: 'message' as const,
+			rowType: Message.getTypeScriptAlgebraicType()
+		},
+		move_all_players_timer: {
+			tableName: 'move_all_players_timer' as const,
+			rowType: MoveAllPlayersTimer.getTypeScriptAlgebraicType(),
+			primaryKey: 'scheduledId',
+			primaryKeyInfo: {
+				colName: 'scheduledId',
+				colType: (
+					MoveAllPlayersTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product
+				).value.elements[0].algebraicType
+			}
+		},
+		player: {
+			tableName: 'player' as const,
+			rowType: Player.getTypeScriptAlgebraicType(),
+			primaryKey: 'identity',
+			primaryKeyInfo: {
+				colName: 'identity',
+				colType: (Player.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product).value
+					.elements[0].algebraicType
+			}
+		},
+		spawn_food_timer: {
+			tableName: 'spawn_food_timer' as const,
+			rowType: SpawnFoodTimer.getTypeScriptAlgebraicType(),
+			primaryKey: 'scheduledId',
+			primaryKeyInfo: {
+				colName: 'scheduledId',
+				colType: (SpawnFoodTimer.getTypeScriptAlgebraicType() as __AlgebraicTypeVariants.Product)
+					.value.elements[0].algebraicType
+			}
+		}
+	},
+	reducers: {
+		client_connected: {
+			reducerName: 'client_connected',
+			argsType: ClientConnected.getTypeScriptAlgebraicType()
+		},
+		debug: {
+			reducerName: 'debug',
+			argsType: Debug.getTypeScriptAlgebraicType()
+		},
+		enter_game: {
+			reducerName: 'enter_game',
+			argsType: EnterGame.getTypeScriptAlgebraicType()
+		},
+		identity_disconnected: {
+			reducerName: 'identity_disconnected',
+			argsType: IdentityDisconnected.getTypeScriptAlgebraicType()
+		},
+		move_all_players: {
+			reducerName: 'move_all_players',
+			argsType: MoveAllPlayers.getTypeScriptAlgebraicType()
+		},
+		send_message: {
+			reducerName: 'send_message',
+			argsType: SendMessage.getTypeScriptAlgebraicType()
+		},
+		set_color: {
+			reducerName: 'set_color',
+			argsType: SetColor.getTypeScriptAlgebraicType()
+		},
+		set_name: {
+			reducerName: 'set_name',
+			argsType: SetName.getTypeScriptAlgebraicType()
+		},
+		spawn_food: {
+			reducerName: 'spawn_food',
+			argsType: SpawnFood.getTypeScriptAlgebraicType()
+		},
+		update_player_input: {
+			reducerName: 'update_player_input',
+			argsType: UpdatePlayerInput.getTypeScriptAlgebraicType()
+		}
+	},
+	versionInfo: {
+		cliVersion: '1.7.0'
+	},
+	// Constructors which are used by the DbConnectionImpl to
+	// extract type information from the generated RemoteModule.
+	//
+	// NOTE: This is not strictly necessary for `eventContextConstructor` because
+	// all we do is build a TypeScript object which we could have done inside the
+	// SDK, but if in the future we wanted to create a class this would be
+	// necessary because classes have methods, so we'll keep it.
+	eventContextConstructor: (imp: __DbConnectionImpl, event: __Event<Reducer>) => {
+		return {
+			...(imp as DbConnection),
+			event
+		};
+	},
+	dbViewConstructor: (imp: __DbConnectionImpl) => {
+		return new RemoteTables(imp);
+	},
+	reducersConstructor: (imp: __DbConnectionImpl, setReducerFlags: SetReducerFlags) => {
+		return new RemoteReducers(imp, setReducerFlags);
+	},
+	setReducerFlagsConstructor: () => {
+		return new SetReducerFlags();
+	}
+};
 
 // A type representing all the possible variants of a reducer.
-export type Reducer = never
-| { name: "ClientConnected", args: ClientConnected }
-| { name: "Debug", args: Debug }
-| { name: "EnterGame", args: EnterGame }
-| { name: "IdentityDisconnected", args: IdentityDisconnected }
-| { name: "MoveAllPlayers", args: MoveAllPlayers }
-| { name: "SendMessage", args: SendMessage }
-| { name: "SetColor", args: SetColor }
-| { name: "SetName", args: SetName }
-| { name: "SpawnFood", args: SpawnFood }
-| { name: "UpdatePlayerInput", args: UpdatePlayerInput }
-;
+export type Reducer =
+	| never
+	| { name: 'ClientConnected'; args: ClientConnected }
+	| { name: 'Debug'; args: Debug }
+	| { name: 'EnterGame'; args: EnterGame }
+	| { name: 'IdentityDisconnected'; args: IdentityDisconnected }
+	| { name: 'MoveAllPlayers'; args: MoveAllPlayers }
+	| { name: 'SendMessage'; args: SendMessage }
+	| { name: 'SetColor'; args: SetColor }
+	| { name: 'SetName'; args: SetName }
+	| { name: 'SpawnFood'; args: SpawnFood }
+	| { name: 'UpdatePlayerInput'; args: UpdatePlayerInput };
 
 export class RemoteReducers {
-  constructor(private connection: __DbConnectionImpl, private setCallReducerFlags: SetReducerFlags) {}
+	constructor(
+		private connection: __DbConnectionImpl,
+		private setCallReducerFlags: SetReducerFlags
+	) {}
 
-  onClientConnected(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.onReducer("client_connected", callback);
-  }
+	onClientConnected(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.onReducer('client_connected', callback);
+	}
 
-  removeOnClientConnected(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.offReducer("client_connected", callback);
-  }
+	removeOnClientConnected(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.offReducer('client_connected', callback);
+	}
 
-  debug() {
-    this.connection.callReducer("debug", new Uint8Array(0), this.setCallReducerFlags.debugFlags);
-  }
+	debug() {
+		this.connection.callReducer('debug', new Uint8Array(0), this.setCallReducerFlags.debugFlags);
+	}
 
-  onDebug(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.onReducer("debug", callback);
-  }
+	onDebug(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.onReducer('debug', callback);
+	}
 
-  removeOnDebug(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.offReducer("debug", callback);
-  }
+	removeOnDebug(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.offReducer('debug', callback);
+	}
 
-  enterGame() {
-    this.connection.callReducer("enter_game", new Uint8Array(0), this.setCallReducerFlags.enterGameFlags);
-  }
+	enterGame() {
+		this.connection.callReducer(
+			'enter_game',
+			new Uint8Array(0),
+			this.setCallReducerFlags.enterGameFlags
+		);
+	}
 
-  onEnterGame(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.onReducer("enter_game", callback);
-  }
+	onEnterGame(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.onReducer('enter_game', callback);
+	}
 
-  removeOnEnterGame(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.offReducer("enter_game", callback);
-  }
+	removeOnEnterGame(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.offReducer('enter_game', callback);
+	}
 
-  onIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.onReducer("identity_disconnected", callback);
-  }
+	onIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.onReducer('identity_disconnected', callback);
+	}
 
-  removeOnIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
-    this.connection.offReducer("identity_disconnected", callback);
-  }
+	removeOnIdentityDisconnected(callback: (ctx: ReducerEventContext) => void) {
+		this.connection.offReducer('identity_disconnected', callback);
+	}
 
-  moveAllPlayers(timer: MoveAllPlayersTimer) {
-    const __args = { timer };
-    let __writer = new __BinaryWriter(1024);
-    MoveAllPlayers.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("move_all_players", __argsBuffer, this.setCallReducerFlags.moveAllPlayersFlags);
-  }
+	moveAllPlayers(timer: MoveAllPlayersTimer) {
+		const __args = { timer };
+		let __writer = new __BinaryWriter(1024);
+		MoveAllPlayers.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer(
+			'move_all_players',
+			__argsBuffer,
+			this.setCallReducerFlags.moveAllPlayersFlags
+		);
+	}
 
-  onMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
-    this.connection.onReducer("move_all_players", callback);
-  }
+	onMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
+		this.connection.onReducer('move_all_players', callback);
+	}
 
-  removeOnMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
-    this.connection.offReducer("move_all_players", callback);
-  }
+	removeOnMoveAllPlayers(callback: (ctx: ReducerEventContext, timer: MoveAllPlayersTimer) => void) {
+		this.connection.offReducer('move_all_players', callback);
+	}
 
-  sendMessage(text: string) {
-    const __args = { text };
-    let __writer = new __BinaryWriter(1024);
-    SendMessage.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("send_message", __argsBuffer, this.setCallReducerFlags.sendMessageFlags);
-  }
+	sendMessage(text: string) {
+		const __args = { text };
+		let __writer = new __BinaryWriter(1024);
+		SendMessage.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer(
+			'send_message',
+			__argsBuffer,
+			this.setCallReducerFlags.sendMessageFlags
+		);
+	}
 
-  onSendMessage(callback: (ctx: ReducerEventContext, text: string) => void) {
-    this.connection.onReducer("send_message", callback);
-  }
+	onSendMessage(callback: (ctx: ReducerEventContext, text: string) => void) {
+		this.connection.onReducer('send_message', callback);
+	}
 
-  removeOnSendMessage(callback: (ctx: ReducerEventContext, text: string) => void) {
-    this.connection.offReducer("send_message", callback);
-  }
+	removeOnSendMessage(callback: (ctx: ReducerEventContext, text: string) => void) {
+		this.connection.offReducer('send_message', callback);
+	}
 
-  setColor(color: string) {
-    const __args = { color };
-    let __writer = new __BinaryWriter(1024);
-    SetColor.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("set_color", __argsBuffer, this.setCallReducerFlags.setColorFlags);
-  }
+	setColor(color: string) {
+		const __args = { color };
+		let __writer = new __BinaryWriter(1024);
+		SetColor.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer('set_color', __argsBuffer, this.setCallReducerFlags.setColorFlags);
+	}
 
-  onSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
-    this.connection.onReducer("set_color", callback);
-  }
+	onSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
+		this.connection.onReducer('set_color', callback);
+	}
 
-  removeOnSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
-    this.connection.offReducer("set_color", callback);
-  }
+	removeOnSetColor(callback: (ctx: ReducerEventContext, color: string) => void) {
+		this.connection.offReducer('set_color', callback);
+	}
 
-  setName(name: string) {
-    const __args = { name };
-    let __writer = new __BinaryWriter(1024);
-    SetName.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("set_name", __argsBuffer, this.setCallReducerFlags.setNameFlags);
-  }
+	setName(name: string) {
+		const __args = { name };
+		let __writer = new __BinaryWriter(1024);
+		SetName.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer('set_name', __argsBuffer, this.setCallReducerFlags.setNameFlags);
+	}
 
-  onSetName(callback: (ctx: ReducerEventContext, name: string) => void) {
-    this.connection.onReducer("set_name", callback);
-  }
+	onSetName(callback: (ctx: ReducerEventContext, name: string) => void) {
+		this.connection.onReducer('set_name', callback);
+	}
 
-  removeOnSetName(callback: (ctx: ReducerEventContext, name: string) => void) {
-    this.connection.offReducer("set_name", callback);
-  }
+	removeOnSetName(callback: (ctx: ReducerEventContext, name: string) => void) {
+		this.connection.offReducer('set_name', callback);
+	}
 
-  spawnFood(timer: SpawnFoodTimer) {
-    const __args = { timer };
-    let __writer = new __BinaryWriter(1024);
-    SpawnFood.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("spawn_food", __argsBuffer, this.setCallReducerFlags.spawnFoodFlags);
-  }
+	spawnFood(timer: SpawnFoodTimer) {
+		const __args = { timer };
+		let __writer = new __BinaryWriter(1024);
+		SpawnFood.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer(
+			'spawn_food',
+			__argsBuffer,
+			this.setCallReducerFlags.spawnFoodFlags
+		);
+	}
 
-  onSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
-    this.connection.onReducer("spawn_food", callback);
-  }
+	onSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
+		this.connection.onReducer('spawn_food', callback);
+	}
 
-  removeOnSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
-    this.connection.offReducer("spawn_food", callback);
-  }
+	removeOnSpawnFood(callback: (ctx: ReducerEventContext, timer: SpawnFoodTimer) => void) {
+		this.connection.offReducer('spawn_food', callback);
+	}
 
-  updatePlayerInput(direction: DbVector2) {
-    const __args = { direction };
-    let __writer = new __BinaryWriter(1024);
-    UpdatePlayerInput.serialize(__writer, __args);
-    let __argsBuffer = __writer.getBuffer();
-    this.connection.callReducer("update_player_input", __argsBuffer, this.setCallReducerFlags.updatePlayerInputFlags);
-  }
+	updatePlayerInput(direction: DbVector2) {
+		const __args = { direction };
+		let __writer = new __BinaryWriter(1024);
+		UpdatePlayerInput.serialize(__writer, __args);
+		let __argsBuffer = __writer.getBuffer();
+		this.connection.callReducer(
+			'update_player_input',
+			__argsBuffer,
+			this.setCallReducerFlags.updatePlayerInputFlags
+		);
+	}
 
-  onUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
-    this.connection.onReducer("update_player_input", callback);
-  }
+	onUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
+		this.connection.onReducer('update_player_input', callback);
+	}
 
-  removeOnUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
-    this.connection.offReducer("update_player_input", callback);
-  }
-
+	removeOnUpdatePlayerInput(callback: (ctx: ReducerEventContext, direction: DbVector2) => void) {
+		this.connection.offReducer('update_player_input', callback);
+	}
 }
 
 export class SetReducerFlags {
-  debugFlags: __CallReducerFlags = 'FullUpdate';
-  debug(flags: __CallReducerFlags) {
-    this.debugFlags = flags;
-  }
+	debugFlags: __CallReducerFlags = 'FullUpdate';
+	debug(flags: __CallReducerFlags) {
+		this.debugFlags = flags;
+	}
 
-  enterGameFlags: __CallReducerFlags = 'FullUpdate';
-  enterGame(flags: __CallReducerFlags) {
-    this.enterGameFlags = flags;
-  }
+	enterGameFlags: __CallReducerFlags = 'FullUpdate';
+	enterGame(flags: __CallReducerFlags) {
+		this.enterGameFlags = flags;
+	}
 
-  moveAllPlayersFlags: __CallReducerFlags = 'FullUpdate';
-  moveAllPlayers(flags: __CallReducerFlags) {
-    this.moveAllPlayersFlags = flags;
-  }
+	moveAllPlayersFlags: __CallReducerFlags = 'FullUpdate';
+	moveAllPlayers(flags: __CallReducerFlags) {
+		this.moveAllPlayersFlags = flags;
+	}
 
-  sendMessageFlags: __CallReducerFlags = 'FullUpdate';
-  sendMessage(flags: __CallReducerFlags) {
-    this.sendMessageFlags = flags;
-  }
+	sendMessageFlags: __CallReducerFlags = 'FullUpdate';
+	sendMessage(flags: __CallReducerFlags) {
+		this.sendMessageFlags = flags;
+	}
 
-  setColorFlags: __CallReducerFlags = 'FullUpdate';
-  setColor(flags: __CallReducerFlags) {
-    this.setColorFlags = flags;
-  }
+	setColorFlags: __CallReducerFlags = 'FullUpdate';
+	setColor(flags: __CallReducerFlags) {
+		this.setColorFlags = flags;
+	}
 
-  setNameFlags: __CallReducerFlags = 'FullUpdate';
-  setName(flags: __CallReducerFlags) {
-    this.setNameFlags = flags;
-  }
+	setNameFlags: __CallReducerFlags = 'FullUpdate';
+	setName(flags: __CallReducerFlags) {
+		this.setNameFlags = flags;
+	}
 
-  spawnFoodFlags: __CallReducerFlags = 'FullUpdate';
-  spawnFood(flags: __CallReducerFlags) {
-    this.spawnFoodFlags = flags;
-  }
+	spawnFoodFlags: __CallReducerFlags = 'FullUpdate';
+	spawnFood(flags: __CallReducerFlags) {
+		this.spawnFoodFlags = flags;
+	}
 
-  updatePlayerInputFlags: __CallReducerFlags = 'FullUpdate';
-  updatePlayerInput(flags: __CallReducerFlags) {
-    this.updatePlayerInputFlags = flags;
-  }
-
+	updatePlayerInputFlags: __CallReducerFlags = 'FullUpdate';
+	updatePlayerInput(flags: __CallReducerFlags) {
+		this.updatePlayerInputFlags = flags;
+	}
 }
 
 export class RemoteTables {
-  constructor(private connection: __DbConnectionImpl) {}
+	constructor(private connection: __DbConnectionImpl) {}
 
-  get circle(): CircleTableHandle<'circle'> {
-    // clientCache is a private property
-    return new CircleTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Circle>(REMOTE_MODULE.tables.circle));
-  }
+	get circle(): CircleTableHandle<'circle'> {
+		// clientCache is a private property
+		return new CircleTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Circle>(REMOTE_MODULE.tables.circle)
+		);
+	}
 
-  get config(): ConfigTableHandle<'config'> {
-    // clientCache is a private property
-    return new ConfigTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Config>(REMOTE_MODULE.tables.config));
-  }
+	get config(): ConfigTableHandle<'config'> {
+		// clientCache is a private property
+		return new ConfigTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Config>(REMOTE_MODULE.tables.config)
+		);
+	}
 
-  get entity(): EntityTableHandle<'entity'> {
-    // clientCache is a private property
-    return new EntityTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Entity>(REMOTE_MODULE.tables.entity));
-  }
+	get entity(): EntityTableHandle<'entity'> {
+		// clientCache is a private property
+		return new EntityTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Entity>(REMOTE_MODULE.tables.entity)
+		);
+	}
 
-  get food(): FoodTableHandle<'food'> {
-    // clientCache is a private property
-    return new FoodTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Food>(REMOTE_MODULE.tables.food));
-  }
+	get food(): FoodTableHandle<'food'> {
+		// clientCache is a private property
+		return new FoodTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Food>(REMOTE_MODULE.tables.food)
+		);
+	}
 
-  get loggedOutPlayer(): LoggedOutPlayerTableHandle<'logged_out_player'> {
-    // clientCache is a private property
-    return new LoggedOutPlayerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.logged_out_player));
-  }
+	get loggedOutPlayer(): LoggedOutPlayerTableHandle<'logged_out_player'> {
+		// clientCache is a private property
+		return new LoggedOutPlayerTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.logged_out_player)
+		);
+	}
 
-  get message(): MessageTableHandle<'message'> {
-    // clientCache is a private property
-    return new MessageTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Message>(REMOTE_MODULE.tables.message));
-  }
+	get message(): MessageTableHandle<'message'> {
+		// clientCache is a private property
+		return new MessageTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Message>(REMOTE_MODULE.tables.message)
+		);
+	}
 
-  get moveAllPlayersTimer(): MoveAllPlayersTimerTableHandle<'move_all_players_timer'> {
-    // clientCache is a private property
-    return new MoveAllPlayersTimerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<MoveAllPlayersTimer>(REMOTE_MODULE.tables.move_all_players_timer));
-  }
+	get moveAllPlayersTimer(): MoveAllPlayersTimerTableHandle<'move_all_players_timer'> {
+		// clientCache is a private property
+		return new MoveAllPlayersTimerTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<MoveAllPlayersTimer>(
+				REMOTE_MODULE.tables.move_all_players_timer
+			)
+		);
+	}
 
-  get player(): PlayerTableHandle<'player'> {
-    // clientCache is a private property
-    return new PlayerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.player));
-  }
+	get player(): PlayerTableHandle<'player'> {
+		// clientCache is a private property
+		return new PlayerTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<Player>(REMOTE_MODULE.tables.player)
+		);
+	}
 
-  get spawnFoodTimer(): SpawnFoodTimerTableHandle<'spawn_food_timer'> {
-    // clientCache is a private property
-    return new SpawnFoodTimerTableHandle((this.connection as unknown as { clientCache: __ClientCache }).clientCache.getOrCreateTable<SpawnFoodTimer>(REMOTE_MODULE.tables.spawn_food_timer));
-  }
+	get spawnFoodTimer(): SpawnFoodTimerTableHandle<'spawn_food_timer'> {
+		// clientCache is a private property
+		return new SpawnFoodTimerTableHandle(
+			(
+				this.connection as unknown as { clientCache: __ClientCache }
+			).clientCache.getOrCreateTable<SpawnFoodTimer>(REMOTE_MODULE.tables.spawn_food_timer)
+		);
+	}
 }
 
-export class SubscriptionBuilder extends __SubscriptionBuilderImpl<RemoteTables, RemoteReducers, SetReducerFlags> { }
+export class SubscriptionBuilder extends __SubscriptionBuilderImpl<
+	RemoteTables,
+	RemoteReducers,
+	SetReducerFlags
+> {}
 
-export class DbConnection extends __DbConnectionImpl<RemoteTables, RemoteReducers, SetReducerFlags> {
-  static builder = (): __DbConnectionBuilder<DbConnection, ErrorContext, SubscriptionEventContext> => {
-    return new __DbConnectionBuilder<DbConnection, ErrorContext, SubscriptionEventContext>(REMOTE_MODULE, (imp: __DbConnectionImpl) => imp as DbConnection);
-  }
-  subscriptionBuilder = (): SubscriptionBuilder => {
-    return new SubscriptionBuilder(this);
-  }
+export class DbConnection extends __DbConnectionImpl<
+	RemoteTables,
+	RemoteReducers,
+	SetReducerFlags
+> {
+	static builder = (): __DbConnectionBuilder<
+		DbConnection,
+		ErrorContext,
+		SubscriptionEventContext
+	> => {
+		return new __DbConnectionBuilder<DbConnection, ErrorContext, SubscriptionEventContext>(
+			REMOTE_MODULE,
+			(imp: __DbConnectionImpl) => imp as DbConnection
+		);
+	};
+	subscriptionBuilder = (): SubscriptionBuilder => {
+		return new SubscriptionBuilder(this);
+	};
 }
 
-export type EventContext = __EventContextInterface<RemoteTables, RemoteReducers, SetReducerFlags, Reducer>;
-export type ReducerEventContext = __ReducerEventContextInterface<RemoteTables, RemoteReducers, SetReducerFlags, Reducer>;
-export type SubscriptionEventContext = __SubscriptionEventContextInterface<RemoteTables, RemoteReducers, SetReducerFlags>;
+export type EventContext = __EventContextInterface<
+	RemoteTables,
+	RemoteReducers,
+	SetReducerFlags,
+	Reducer
+>;
+export type ReducerEventContext = __ReducerEventContextInterface<
+	RemoteTables,
+	RemoteReducers,
+	SetReducerFlags,
+	Reducer
+>;
+export type SubscriptionEventContext = __SubscriptionEventContextInterface<
+	RemoteTables,
+	RemoteReducers,
+	SetReducerFlags
+>;
 export type ErrorContext = __ErrorContextInterface<RemoteTables, RemoteReducers, SetReducerFlags>;
