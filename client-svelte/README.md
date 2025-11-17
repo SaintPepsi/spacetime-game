@@ -1,38 +1,19 @@
-# sv
+# Spacetime DB version of agar.io
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+1. Start spacetime db server
 
-## Creating a project
+   ```sh
+   spacetime start
+   ```
 
-If you're seeing this, you've probably already done this step. Congrats!
+2. run spacetime dev mode
 
-```sh
-# create a new project in the current directory
-npx sv create
+   ```sh
+   just dev
+   ```
 
-# create a new project in my-app
-npx sv create my-app
-```
+3. start vite
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+   ```sh
+   bun run dev
+   ```
