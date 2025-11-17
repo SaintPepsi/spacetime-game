@@ -28,13 +28,13 @@ export type Expr<Column extends string> =
 	| { type: 'or'; children: Expr<Column>[] };
 
 // Query builder helpers (unchanged from React version)
-export const eq = <Column extends string>(key: Column, value: Value): Expr<Column> => ({
+const eq = <Column extends string>(key: Column, value: Value): Expr<Column> => ({
 	type: 'eq',
 	key,
 	value
 });
 
-export const and = <Column extends string>(...children: Expr<Column>[]): Expr<Column> => {
+const and = <Column extends string>(...children: Expr<Column>[]): Expr<Column> => {
 	const flat: Expr<Column>[] = [];
 	for (const c of children) {
 		if (!c) continue;
@@ -47,7 +47,7 @@ export const and = <Column extends string>(...children: Expr<Column>[]): Expr<Co
 	return { type: 'and', children: pruned };
 };
 
-export const or = <Column extends string>(...children: Expr<Column>[]): Expr<Column> => {
+const or = <Column extends string>(...children: Expr<Column>[]): Expr<Column> => {
 	const flat: Expr<Column>[] = [];
 	for (const c of children) {
 		if (!c) continue;
@@ -145,6 +145,17 @@ export type RowTypes<TableName extends keyof Connection['db']> = Parameters<
 	Connection['db'][TableName]['tableCache']['update']
 >[2];
 
+type WhereClauseCallbackParameters<Column extends string> = {
+	where(expr: Expr<Column>): Expr<Column>;
+	eq(key: Column, value: Value): Expr<Column>;
+	and(...children: Expr<Column>[]): Expr<Column>;
+	or(...children: Expr<Column>[]): Expr<Column>;
+};
+
+type WhereClauseCallback<RowType> = (
+	params: WhereClauseCallbackParameters<ColumnsFromRow<RowType>>
+) => Expr<ColumnsFromRow<RowType>>;
+
 /**
  * Svelte 5 rune class for subscribing to SpacetimeDB tables with reactive updates.
  *
@@ -154,10 +165,11 @@ export type RowTypes<TableName extends keyof Connection['db']> = Parameters<
  * @example
  * ```svelte
  * <script>
- *   const userTable = new TableQuery('users', where(eq('isActive', true)), {
+ *   const userTable = new TableQuery('users', ({ where, eq }) => where(eq('isActive', true)), {
  *     onInsert: (row) => console.log('Inserted:', row),
  *     onDelete: (row) => console.log('Deleted:', row),
  *     onUpdate: (oldRow, newRow) => console.log('Updated:', oldRow, newRow),
+ * 	   onInitialSnapshot: (rows) => console.log('Initial snapshot:', rows)
  *   });
  * </script>
  *
@@ -191,17 +203,17 @@ export class TableQuery<
 
 	constructor(
 		tableName: TableName,
-		whereClause?: Expr<ColumnsFromRow<RowType>>,
+		whereClause?: WhereClauseCallback<RowType>,
 		callbacks?: UseQueryCallbacks<RowType>
 	) {
 		this.#client = SpacetimeDB.getContext<Connection>();
 		this.#tableName = tableName;
-		this.#whereClause = whereClause;
+		this.#whereClause = whereClause ? whereClause({ where, eq, and, or }) : undefined;
 		this.#callbacks = callbacks;
 
 		this.#query =
 			`SELECT * FROM ${tableName as string}` +
-			(whereClause ? ` WHERE ${toString(whereClause)}` : '');
+			(this.#whereClause ? ` WHERE ${toString(this.#whereClause)}` : '');
 
 		// Initialize subscription in constructor
 
@@ -379,7 +391,7 @@ export function useTable<
 	RowType extends RowTypes<TableName>
 >(
 	tableName: TableName,
-	whereClause?: Expr<ColumnsFromRow<RowType>>,
+	whereClause?: WhereClauseCallback<RowType>,
 	callbacks?: UseQueryCallbacks<RowType>
 ) {
 	const query = new TableQuery(tableName, whereClause, callbacks);

@@ -28,7 +28,7 @@
 	const { app, camera } = getSceneContext();
 
 	// Config data query (for world size)
-	let configData = new TableQuery('config', void 0);
+	let configData = new TableQuery('config', ({ where, eq }) => where(eq('id', 0)));
 
 	let config = $derived(configData.rows[0]);
 	let worldSize = $derived(config ? Number(config.worldSize) : 0);
