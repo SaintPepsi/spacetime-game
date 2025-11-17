@@ -1,7 +1,7 @@
 import type { ClientPlayerPawn } from '$lib/ClientPlayerPawn';
 import type { Circle as CircleData, Entity, Player } from '@module_bindings';
 import { BitmapText, Container, Graphics } from 'pixi.js';
-import { ClientEntity } from './ClientEntity';
+import { ClientEntity, type EntityType } from './ClientEntity';
 
 /**
  * ClientCircle entity class - represents a player-controlled entity
@@ -56,14 +56,30 @@ export class ClientCircle extends ClientEntity {
 		this.updatePointerDirection(circleData.direction);
 	}
 
+	private drawGraphic(
+		graphic = this.graphic,
+		color = parseInt(this.playerData?.color?.replace('#', '') || 'ffffff', 16),
+		mass = this.mass
+	) {
+		const radius = ClientEntity.massToRadius(mass);
+		graphic.clear().circle(0, 0, radius).fill(color);
+	}
+
 	/**
 	 * Create the circular graphic with player color
 	 * Uses mass-based radius from entity data
 	 */
 	private createGraphic(playerData?: Player): Graphics {
 		const colorHex = parseInt(playerData?.color?.replace('#', '') || 'ffffff', 16);
-		const radius = ClientEntity.massToRadius(this.mass);
-		return new Graphics().circle(0, 0, radius).fill(colorHex);
+
+		const newGraphic = new Graphics();
+		this.drawGraphic(newGraphic, colorHex, this.mass);
+		return newGraphic;
+	}
+
+	private drawPointer(graphic = this.pointer, mass = this.mass) {
+		const radius = ClientEntity.massToRadius(mass);
+		graphic.rect(0, -1, radius, 2).fill(0xffffff);
 	}
 
 	/**
@@ -71,8 +87,9 @@ export class ClientCircle extends ClientEntity {
 	 * Scales with entity radius
 	 */
 	private createPointer(): Graphics {
-		const radius = ClientEntity.massToRadius(this.mass);
-		return new Graphics().rect(0, -1, radius, 2).fill(0xffffff);
+		const newGraphics = new Graphics();
+		this.drawPointer(newGraphics);
+		return newGraphics;
 	}
 
 	/**
@@ -112,8 +129,8 @@ export class ClientCircle extends ClientEntity {
 	 */
 	public updateColor(color: string): void {
 		const colorHex = parseInt(color.replace('#', '') || 'ffffff', 16);
-		const radius = ClientEntity.massToRadius(this.mass);
-		this.graphic.clear().circle(0, 0, radius).fill(colorHex);
+
+		this.drawGraphic(this.graphic, colorHex, this.mass);
 	}
 
 	/**
@@ -160,5 +177,12 @@ export class ClientCircle extends ClientEntity {
 
 		// Counter-scale the name tag so it stays the same size
 		// Since the container is scaled, we need to scale the name tag inversely
+	}
+
+	public onEntityUpdated(newVal: EntityType) {
+		super.onEntityUpdated(newVal);
+
+		this.drawGraphic();
+		this.drawPointer();
 	}
 }

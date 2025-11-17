@@ -6,16 +6,10 @@ interface EventContext {
 	// Define properties based on your FEventContext structure
 }
 
-interface EntityType {
+export type EntityType = {
 	position: { x: number; y: number };
 	mass: number;
-}
-const START_PLAYER_SPEED = 1;
-const START_PLAYER_MASS = 15;
-
-function massToMaxMoveSpeed(mass: number): number {
-	return (2.0 * START_PLAYER_SPEED) / (1.0 + Math.sqrt(mass / START_PLAYER_MASS));
-}
+};
 
 /**
  * TypeScript equivalent of the Unreal Engine AEntity class
