@@ -4,31 +4,31 @@
 /* eslint-disable */
 /* tslint:disable */
 import {
-	AlgebraicType as __AlgebraicTypeValue,
-	BinaryReader as __BinaryReader,
-	BinaryWriter as __BinaryWriter,
-	ClientCache as __ClientCache,
-	ConnectionId as __ConnectionId,
-	DbConnectionBuilder as __DbConnectionBuilder,
-	DbConnectionImpl as __DbConnectionImpl,
-	Identity as __Identity,
-	SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
-	TableCache as __TableCache,
-	TimeDuration as __TimeDuration,
-	Timestamp as __Timestamp,
-	deepEqual as __deepEqual,
-	type AlgebraicType as __AlgebraicTypeType,
-	type AlgebraicTypeVariants as __AlgebraicTypeVariants,
-	type CallReducerFlags as __CallReducerFlags,
-	type ErrorContextInterface as __ErrorContextInterface,
-	type Event as __Event,
-	type EventContextInterface as __EventContextInterface,
-	type ReducerEventContextInterface as __ReducerEventContextInterface,
-	type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
-	type TableHandle as __TableHandle
-} from 'spacetimedb';
-import { SpawnFoodTimer } from './spawn_food_timer_type';
-import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from '.';
+  AlgebraicType as __AlgebraicTypeValue,
+  BinaryReader as __BinaryReader,
+  BinaryWriter as __BinaryWriter,
+  ClientCache as __ClientCache,
+  ConnectionId as __ConnectionId,
+  DbConnectionBuilder as __DbConnectionBuilder,
+  DbConnectionImpl as __DbConnectionImpl,
+  Identity as __Identity,
+  SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
+  TableCache as __TableCache,
+  TimeDuration as __TimeDuration,
+  Timestamp as __Timestamp,
+  deepEqual as __deepEqual,
+  type AlgebraicType as __AlgebraicTypeType,
+  type AlgebraicTypeVariants as __AlgebraicTypeVariants,
+  type CallReducerFlags as __CallReducerFlags,
+  type ErrorContextInterface as __ErrorContextInterface,
+  type Event as __Event,
+  type EventContextInterface as __EventContextInterface,
+  type ReducerEventContextInterface as __ReducerEventContextInterface,
+  type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
+} from "spacetimedb";
+import { SpawnFoodTimer } from "./spawn_food_timer_type";
+import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from ".";
 declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
 
 /**
@@ -41,71 +41,66 @@ declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
  * but to directly chain method calls,
  * like `ctx.db.spawnFoodTimer.on_insert(...)`.
  */
-export class SpawnFoodTimerTableHandle<TableName extends string>
-	implements __TableHandle<TableName>
-{
-	// phantom type to track the table name
-	readonly tableName!: TableName;
-	tableCache: __TableCache<SpawnFoodTimer>;
+export class SpawnFoodTimerTableHandle<TableName extends string> implements __TableHandle<TableName> {
+  // phantom type to track the table name
+  readonly tableName!: TableName;
+  tableCache: __TableCache<SpawnFoodTimer>;
 
-	constructor(tableCache: __TableCache<SpawnFoodTimer>) {
-		this.tableCache = tableCache;
-	}
+  constructor(tableCache: __TableCache<SpawnFoodTimer>) {
+    this.tableCache = tableCache;
+  }
 
-	count(): number {
-		return this.tableCache.count();
-	}
+  count(): number {
+    return this.tableCache.count();
+  }
 
-	iter(): Iterable<SpawnFoodTimer> {
-		return this.tableCache.iter();
-	}
-	/**
-	 * Access to the `scheduledId` unique index on the table `spawn_food_timer`,
-	 * which allows point queries on the field of the same name
-	 * via the [`SpawnFoodTimerScheduledIdUnique.find`] method.
-	 *
-	 * Users are encouraged not to explicitly reference this type,
-	 * but to directly chain method calls,
-	 * like `ctx.db.spawnFoodTimer.scheduledId().find(...)`.
-	 *
-	 * Get a handle on the `scheduledId` unique index on the table `spawn_food_timer`.
-	 */
-	scheduledId = {
-		// Find the subscribed row whose `scheduledId` column value is equal to `col_val`,
-		// if such a row is present in the client cache.
-		find: (col_val: bigint): SpawnFoodTimer | undefined => {
-			for (let row of this.tableCache.iter()) {
-				if (__deepEqual(row.scheduledId, col_val)) {
-					return row;
-				}
-			}
-		}
-	};
+  iter(): Iterable<SpawnFoodTimer> {
+    return this.tableCache.iter();
+  }
+  /**
+   * Access to the `scheduledId` unique index on the table `spawn_food_timer`,
+   * which allows point queries on the field of the same name
+   * via the [`SpawnFoodTimerScheduledIdUnique.find`] method.
+   *
+   * Users are encouraged not to explicitly reference this type,
+   * but to directly chain method calls,
+   * like `ctx.db.spawnFoodTimer.scheduledId().find(...)`.
+   *
+   * Get a handle on the `scheduledId` unique index on the table `spawn_food_timer`.
+   */
+  scheduledId = {
+    // Find the subscribed row whose `scheduledId` column value is equal to `col_val`,
+    // if such a row is present in the client cache.
+    find: (col_val: bigint): SpawnFoodTimer | undefined => {
+      for (let row of this.tableCache.iter()) {
+        if (__deepEqual(row.scheduledId, col_val)) {
+          return row;
+        }
+      }
+    },
+  };
 
-	onInsert = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
-		return this.tableCache.onInsert(cb);
-	};
+  onInsert = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
+    return this.tableCache.onInsert(cb);
+  }
 
-	removeOnInsert = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
-		return this.tableCache.removeOnInsert(cb);
-	};
+  removeOnInsert = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
+    return this.tableCache.removeOnInsert(cb);
+  }
 
-	onDelete = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
-		return this.tableCache.onDelete(cb);
-	};
+  onDelete = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
+    return this.tableCache.onDelete(cb);
+  }
 
-	removeOnDelete = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
-		return this.tableCache.removeOnDelete(cb);
-	};
+  removeOnDelete = (cb: (ctx: EventContext, row: SpawnFoodTimer) => void) => {
+    return this.tableCache.removeOnDelete(cb);
+  }
 
-	// Updates are only defined for tables with primary keys.
-	onUpdate = (cb: (ctx: EventContext, oldRow: SpawnFoodTimer, newRow: SpawnFoodTimer) => void) => {
-		return this.tableCache.onUpdate(cb);
-	};
+  // Updates are only defined for tables with primary keys.
+  onUpdate = (cb: (ctx: EventContext, oldRow: SpawnFoodTimer, newRow: SpawnFoodTimer) => void) => {
+    return this.tableCache.onUpdate(cb);
+  }
 
-	removeOnUpdate = (
-		cb: (ctx: EventContext, onRow: SpawnFoodTimer, newRow: SpawnFoodTimer) => void
-	) => {
-		return this.tableCache.removeOnUpdate(cb);
-	};
-}
+  removeOnUpdate = (cb: (ctx: EventContext, onRow: SpawnFoodTimer, newRow: SpawnFoodTimer) => void) => {
+    return this.tableCache.removeOnUpdate(cb);
+  }}

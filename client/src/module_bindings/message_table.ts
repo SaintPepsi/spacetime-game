@@ -4,31 +4,31 @@
 /* eslint-disable */
 /* tslint:disable */
 import {
-	AlgebraicType as __AlgebraicTypeValue,
-	BinaryReader as __BinaryReader,
-	BinaryWriter as __BinaryWriter,
-	ClientCache as __ClientCache,
-	ConnectionId as __ConnectionId,
-	DbConnectionBuilder as __DbConnectionBuilder,
-	DbConnectionImpl as __DbConnectionImpl,
-	Identity as __Identity,
-	SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
-	TableCache as __TableCache,
-	TimeDuration as __TimeDuration,
-	Timestamp as __Timestamp,
-	deepEqual as __deepEqual,
-	type AlgebraicType as __AlgebraicTypeType,
-	type AlgebraicTypeVariants as __AlgebraicTypeVariants,
-	type CallReducerFlags as __CallReducerFlags,
-	type ErrorContextInterface as __ErrorContextInterface,
-	type Event as __Event,
-	type EventContextInterface as __EventContextInterface,
-	type ReducerEventContextInterface as __ReducerEventContextInterface,
-	type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
-	type TableHandle as __TableHandle
-} from 'spacetimedb';
-import { Message } from './message_type';
-import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from '.';
+  AlgebraicType as __AlgebraicTypeValue,
+  BinaryReader as __BinaryReader,
+  BinaryWriter as __BinaryWriter,
+  ClientCache as __ClientCache,
+  ConnectionId as __ConnectionId,
+  DbConnectionBuilder as __DbConnectionBuilder,
+  DbConnectionImpl as __DbConnectionImpl,
+  Identity as __Identity,
+  SubscriptionBuilderImpl as __SubscriptionBuilderImpl,
+  TableCache as __TableCache,
+  TimeDuration as __TimeDuration,
+  Timestamp as __Timestamp,
+  deepEqual as __deepEqual,
+  type AlgebraicType as __AlgebraicTypeType,
+  type AlgebraicTypeVariants as __AlgebraicTypeVariants,
+  type CallReducerFlags as __CallReducerFlags,
+  type ErrorContextInterface as __ErrorContextInterface,
+  type Event as __Event,
+  type EventContextInterface as __EventContextInterface,
+  type ReducerEventContextInterface as __ReducerEventContextInterface,
+  type SubscriptionEventContextInterface as __SubscriptionEventContextInterface,
+  type TableHandle as __TableHandle,
+} from "spacetimedb";
+import { Message } from "./message_type";
+import { type EventContext, type Reducer, RemoteReducers, RemoteTables } from ".";
 declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
 
 /**
@@ -42,35 +42,35 @@ declare type __keep = [EventContext, Reducer, RemoteReducers, RemoteTables];
  * like `ctx.db.message.on_insert(...)`.
  */
 export class MessageTableHandle<TableName extends string> implements __TableHandle<TableName> {
-	// phantom type to track the table name
-	readonly tableName!: TableName;
-	tableCache: __TableCache<Message>;
+  // phantom type to track the table name
+  readonly tableName!: TableName;
+  tableCache: __TableCache<Message>;
 
-	constructor(tableCache: __TableCache<Message>) {
-		this.tableCache = tableCache;
-	}
+  constructor(tableCache: __TableCache<Message>) {
+    this.tableCache = tableCache;
+  }
 
-	count(): number {
-		return this.tableCache.count();
-	}
+  count(): number {
+    return this.tableCache.count();
+  }
 
-	iter(): Iterable<Message> {
-		return this.tableCache.iter();
-	}
+  iter(): Iterable<Message> {
+    return this.tableCache.iter();
+  }
 
-	onInsert = (cb: (ctx: EventContext, row: Message) => void) => {
-		return this.tableCache.onInsert(cb);
-	};
+  onInsert = (cb: (ctx: EventContext, row: Message) => void) => {
+    return this.tableCache.onInsert(cb);
+  }
 
-	removeOnInsert = (cb: (ctx: EventContext, row: Message) => void) => {
-		return this.tableCache.removeOnInsert(cb);
-	};
+  removeOnInsert = (cb: (ctx: EventContext, row: Message) => void) => {
+    return this.tableCache.removeOnInsert(cb);
+  }
 
-	onDelete = (cb: (ctx: EventContext, row: Message) => void) => {
-		return this.tableCache.onDelete(cb);
-	};
+  onDelete = (cb: (ctx: EventContext, row: Message) => void) => {
+    return this.tableCache.onDelete(cb);
+  }
 
-	removeOnDelete = (cb: (ctx: EventContext, row: Message) => void) => {
-		return this.tableCache.removeOnDelete(cb);
-	};
+  removeOnDelete = (cb: (ctx: EventContext, row: Message) => void) => {
+    return this.tableCache.removeOnDelete(cb);
+  }
 }
