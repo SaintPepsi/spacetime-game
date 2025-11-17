@@ -1,1 +1,1 @@
-bun --cwd ./client run format
+bun --cwd ./client format
