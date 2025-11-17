@@ -100,9 +100,25 @@ pub struct MoveAllPlayersTimer {
 }
 
 const START_PLAYER_SPEED: i32 = 10;
+const MINIMUM_SAFE_MASS_RATIO: f32 = 0.85;
 
 fn mass_to_max_move_speed(mass: i32) -> f32 {
     2.0 * START_PLAYER_SPEED as f32 / (1.0 + (mass as f32 / START_PLAYER_MASS as f32).sqrt())
+}
+
+/// Check if two entities are overlapping based on their positions and masses
+fn is_overlapping(entity_a: &Entity, entity_b: &Entity) -> bool {
+    let radius_a = mass_to_radius(entity_a.mass);
+    let radius_b = mass_to_radius(entity_b.mass);
+    let max_radius = radius_a.max(radius_b);
+
+    // Calculate distance squared between centers
+    let dx = entity_a.position.x - entity_b.position.x;
+    let dy = entity_a.position.y - entity_b.position.y;
+    let distance_squared = dx * dx + dy * dy;
+
+    // If distance is less than max radius, smaller circle's center is inside larger circle
+    distance_squared < max_radius * max_radius
 }
 
 #[reducer]
@@ -115,7 +131,7 @@ pub fn move_all_players(ctx: &ReducerContext, _timer: MoveAllPlayersTimer) -> Re
         .ok_or("Config not found")?
         .world_size;
 
-    // Handle player input
+    // Handle player movement
     for circle in ctx.db.circle().iter() {
         let circle_entity = ctx.db.entity().entity_id().find(&circle.entity_id);
         if !circle_entity.is_some() {
@@ -132,6 +148,67 @@ pub fn move_all_players(ctx: &ReducerContext, _timer: MoveAllPlayersTimer) -> Re
         circle_entity.position.x = new_pos.x.clamp(min, max);
         circle_entity.position.y = new_pos.y.clamp(min, max);
         ctx.db.entity().entity_id().update(circle_entity);
+    }
+
+    // Check for collisions and handle eating mechanics
+    // Collect all entities into a vector to avoid borrow checker issues
+    let all_entities: Vec<Entity> = ctx.db.entity().iter().collect();
+
+    for entity_a in &all_entities {
+        // Skip if entity_a was already deleted
+        if ctx.db.entity().entity_id().find(&entity_a.entity_id).is_none() {
+            continue;
+        }
+
+        for entity_b in &all_entities {
+            // Skip self-collision
+            if entity_a.entity_id == entity_b.entity_id {
+                continue;
+            }
+
+            // Skip if entity_b was already deleted
+            if ctx.db.entity().entity_id().find(&entity_b.entity_id).is_none() {
+                continue;
+            }
+
+            // Check if entities are overlapping
+            if !is_overlapping(entity_a, entity_b) {
+                continue;
+            }
+
+            // Check if entity_b is food
+            if let Some(_food) = ctx.db.food().entity_id().find(&entity_b.entity_id) {
+                // Entity A eats the food
+                let mut updated_entity_a = ctx.db.entity().entity_id().find(&entity_a.entity_id).unwrap();
+                updated_entity_a.mass += entity_b.mass;
+                ctx.db.entity().entity_id().update(updated_entity_a);
+
+                // Delete the food
+                ctx.db.food().entity_id().delete(&entity_b.entity_id);
+                ctx.db.entity().entity_id().delete(&entity_b.entity_id);
+                continue;
+            }
+
+            // Check if both are circles - handle circle vs circle combat
+            if let Some(_circle_a) = ctx.db.circle().entity_id().find(&entity_a.entity_id) {
+                if let Some(_circle_b) = ctx.db.circle().entity_id().find(&entity_b.entity_id) {
+                    // Calculate mass ratio
+                    let mass_ratio = entity_b.mass as f32 / entity_a.mass as f32;
+
+                    // Can only eat if other circle is small enough (below safety threshold)
+                    if mass_ratio < MINIMUM_SAFE_MASS_RATIO {
+                        // Entity A eats entity B
+                        let mut updated_entity_a = ctx.db.entity().entity_id().find(&entity_a.entity_id).unwrap();
+                        updated_entity_a.mass += entity_b.mass;
+                        ctx.db.entity().entity_id().update(updated_entity_a);
+
+                        // Delete the smaller circle
+                        ctx.db.circle().entity_id().delete(&entity_b.entity_id);
+                        ctx.db.entity().entity_id().delete(&entity_b.entity_id);
+                    }
+                }
+            }
+        }
     }
 
     Ok(())

@@ -10,27 +10,20 @@
 
 	onMount(() => {
 		const onConnect = (conn: DbConnection, identity: Identity, token: string) => {
-			// SpacetimeDB.status.set('connected');
 			SpacetimeDB.status.set('connected');
 			SpacetimeDB.authToken.current = token;
-			console.log('Connected to SpacetimeDB with identity:', identity.toHexString());
-			console.log('handle on open');
 			// The conn.isActive property from the base class is already set to true at this point
 			conn.reducers.onSendMessage(() => {
-				console.log('Message sent.');
+				// Message sent callback
 			});
 		};
 
 		const onDisconnect = (ctx: ErrorContext, error?: Error | undefined) => {
-			console.log('error', error);
-			console.log('ctx', ctx);
 			SpacetimeDB.status.set('disconnected');
-			console.log('Disconnected from SpacetimeDB');
 		};
 
 		const onConnectError = (_ctx: ErrorContext, err: Error) => {
 			SpacetimeDB.status.set('error');
-			console.log('Error connecting to SpacetimeDB:', err);
 		};
 
 		const connectionBuilder = DbConnection.builder()

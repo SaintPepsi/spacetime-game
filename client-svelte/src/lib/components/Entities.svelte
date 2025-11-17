@@ -2,6 +2,7 @@
 	import { ClientCircle } from '$lib/ClientCircle';
 	import { ClientFood } from '$lib/ClientFood';
 	import { arenaContext } from '$lib/components/Arena.svelte';
+	import { optionMonad } from '$lib/Option';
 	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 	import type { Circle, Entity, Food, Player } from '@module_bindings';
@@ -35,9 +36,11 @@
 		}
 	});
 
-	let player = $derived(
-		playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString())
-	);
+	function getPlayer() {
+		return playerData.rows.find((p) => p.identity.toHexString() === client.identity?.toHexString());
+	}
+
+	let player = $derived(optionMonad.createOption(getPlayer()));
 
 	/**
 	 * Handle player color changes
@@ -94,7 +97,6 @@
 
 		// Check if circle already exists
 		if (circlesDictionary[entityId]) {
-			console.log('Circle already exists:', entityId);
 			return;
 		}
 
@@ -104,23 +106,15 @@
 		}
 
 		if (!entityRow) {
-			console.log(
-				'Entity not found for circle:',
-				entityId,
-				'Available entities:',
-				entities.rows.length
-			);
 			return; // Entity not ready yet
 		}
 
-		console.log('Creating circle:', entityId);
 		// Create client circle
 		const clientCircle = createClientCircle(circleRow, entityRow);
 		circlesDictionary[entityId] = clientCircle;
 
 		// Add to arena
 		arena.addChild(clientCircle.container);
-		console.log('Circle created and added to arena:', entityId);
 	}
 
 	// Helper function to try creating food if both entity and food data exist
@@ -148,12 +142,10 @@
 	// Circle table query
 	let circleData = new TableQuery('circle', void 0, {
 		onInsert: (row) => {
-			console.log('Circle inserted:', row.entityId, row);
 			tryCreateCircle(row);
 		},
 
 		onDelete: (row) => {
-			console.log('Circle deleted:', row.entityId);
 			const entity = circlesDictionary[row.entityId];
 			if (!entity) return;
 
@@ -226,12 +218,9 @@
 		},
 
 		onInsert: (row) => {
-			console.log('Entity inserted:', row.entityId, row);
-
 			// Try to create circle if circle data exists
 			const circleRow = circleData.rows.find((c) => c.entityId === row.entityId);
 			if (circleRow) {
-				console.log('Found matching circle for entity:', row.entityId);
 				// Pass the entity row directly since it's not in entities.rows yet
 				tryCreateCircle(circleRow, row);
 				return;
@@ -240,35 +229,29 @@
 			// Try to create food if food data exists
 			const foodRow = foodData.rows.find((f) => f.entityId === row.entityId);
 			if (foodRow) {
-				console.log('Found matching food for entity:', row.entityId);
 				// Pass the entity row directly since it's not in entities.rows yet
 				tryCreateFood(foodRow, row);
 				return;
 			}
-
-			console.log('No matching circle or food found for entity:', row.entityId);
 		}
 	});
 
-	// Player circle (for camera tracking)
-	let playerCircle = $derived(
-		circleData.rows.find((circle) => circle.playerId === player?.playerId)
-	);
+	function findPlayerCircle(player: Player) {
+		return circleData.rows.find((circle) => circle.playerId === player.playerId);
+	}
 
-	$inspect('circleData', circleData);
-	$inspect('entities', entities);
-	$inspect('playerCircle', playerCircle);
+	// Player circle (for camera tracking)
+	let playerCircle = $derived(player.map(findPlayerCircle));
+
+	function getPlayerClientCircle(playerCircle: Circle) {
+		return circlesDictionary[playerCircle.entityId];
+	}
+
+	let playerClientCircle = $derived(playerCircle.map(getPlayerClientCircle));
 
 	// Camera follow effect
 	$effect(() => {
-		const entity = circlesDictionary[playerCircle?.entityId || -1];
-		if (!entity) return;
-
-		const unfollow = camera.follow(entity.container);
-
-		return () => {
-			unfollow();
-		};
+		return playerClientCircle.map((circle) => camera.follow(circle.container)).unwrap();
 	});
 
 	// Animation ticker effect

@@ -240,7 +240,6 @@ export class TableQuery<
 	}
 
 	#setupSubscription(): void {
-		console.log('this.#client.isActive', this.#client.isActive);
 		if (!this.#client.isActive) {
 			// If client becomes active later, you might want to use $effect to watch this
 			return;
