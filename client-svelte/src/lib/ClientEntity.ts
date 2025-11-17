@@ -65,7 +65,6 @@ export class ClientEntity {
 		// Interpolate the position and scale
 		this.lerpTime = Math.min(this.lerpTime + deltaTime, this.lerpDuration);
 		const alpha = this.lerpDuration > 0 ? this.lerpTime / this.lerpDuration : 1.0;
-
 		// Lerp position
 		this.container.position.x = lerp(this.lerpStartPosition.x, this.lerpTargetPosition.x, alpha);
 		this.container.position.y = lerp(this.lerpStartPosition.y, this.lerpTargetPosition.y, alpha);
@@ -106,9 +105,8 @@ export class ClientEntity {
 	/**
 	 * Called when the entity is being deleted
 	 * Cleanup logic - destroys the entity
-	 * @param _context Deletion context information
 	 */
-	public onDelete(_context: EventContext): void {
+	public onDelete(): void {
 		// Destroy() equivalent
 		this.container.destroy({ children: true });
 	}

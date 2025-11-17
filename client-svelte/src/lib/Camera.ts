@@ -18,12 +18,25 @@ export class Camera {
 		this.handleRendererResize();
 	}
 
-	follow(targetContainer: Container) {
+	followContainer(targetContainer: Container) {
 		const handleFollow = () => {
 			this.centerOn(targetContainer);
 		};
 
 		this.app.ticker.add(handleFollow);
+		return () => {
+			this.app.ticker.remove(handleFollow);
+		};
+	}
+
+	followPoint(getPoint: () => { x: number; y: number }) {
+		const handleFollow = () => {
+			const point = getPoint();
+			this.setPosition(-point.x, -point.y);
+		};
+
+		this.app.ticker.add(handleFollow);
+
 		return () => {
 			this.app.ticker.remove(handleFollow);
 		};

@@ -92,6 +92,7 @@ export class ClientPlayerPawn {
 	 * Get the center of mass position for camera tracking
 	 */
 	public getCenterOfMass(): Point {
+		console.log('getting centre of mass');
 		// Recalculate before returning to ensure up-to-date position
 		this.updateCenterOfMass();
 		return this.centerOfMass;
@@ -127,11 +128,20 @@ export class ClientPlayerPawn {
 	}
 
 	/**
+	 * Update the circle's direction pointer
+	 */
+	public updateDirection(direction: { x: number; y: number }): void {
+		for (const circle of this.ownedCircles.values()) {
+			circle.updateDirection(direction);
+		}
+	}
+
+	/**
 	 * Destroy all owned circles and cleanup
 	 */
 	public destroy(): void {
 		for (const circle of this.ownedCircles.values()) {
-			circle.onDelete({});
+			circle.onDelete();
 		}
 		this.ownedCircles.clear();
 	}

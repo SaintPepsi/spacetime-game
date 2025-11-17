@@ -1,24 +1,33 @@
 <script lang="ts">
+	import { dictionaries } from '$lib/data/dictionaries';
+	import { option } from '$lib/Option';
+	import { UserPlayer } from '$lib/runes/UserPlayer.svelte';
 	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import { sceneContext } from '@routes/SceneContext.svelte';
 	import { Point } from 'pixi.js';
-	import { sceneContext } from '../../routes/SceneContext.svelte';
 
 	let client = SpacetimeDB.getContext();
 
 	const [getSceneContext] = sceneContext;
 	let { app } = getSceneContext();
 
+	const { playerPawn: playerPawnDictionary } = dictionaries;
 	// Input state
 	let inputLocked = $state(false);
-	let lockedDirection = $state(new Point(0, 0));
+	let lastDirection = $state(new Point(0, 0));
 	let lastUpdateTime = 0;
 	const UPDATE_THROTTLE_MS = 50; // Send updates every 50ms max
+
+	let userPlayer = new UserPlayer();
 
 	/**
 	 * Compute desired movement direction
 	 * Normalized by viewport height thirds for consistent feel
 	 */
-	function computeDesiredDirection(mousePos: Point, canvasSize: { width: number; height: number }): Point {
+	function computeDesiredDirection(
+		mousePos: Point,
+		canvasSize: { width: number; height: number }
+	): Point {
 		const centerOfScreen = new Point(canvasSize.width / 2, canvasSize.height / 2);
 		let direction = mousePos.subtract(centerOfScreen);
 
@@ -48,28 +57,31 @@
 
 		lastUpdateTime = now;
 		client.reducers.updatePlayerInput(direction);
+
+		userPlayer.current
+			.flatMap((_player) => option(playerPawnDictionary.get(_player.playerId)))
+			.map((pawn) => {
+				pawn.updateDirection(direction);
+			});
 	}
 
 	// Mouse move handler
 	$effect(() => {
 		const handlePointerMove = (e: PointerEvent) => {
 			if (!e.target) return;
+			if (inputLocked) return;
 			const canvas = e.target as HTMLCanvasElement;
 			const clientRect = canvas.getBoundingClientRect();
 
 			const mousePosition = new Point(e.clientX - clientRect.left, e.clientY - clientRect.top);
-			const direction = computeDesiredDirection(mousePosition, {
+
+			lastDirection = computeDesiredDirection(mousePosition, {
 				width: canvas.width,
 				height: canvas.height
 			});
 
-			if (inputLocked) {
-				// Use locked direction
-				sendInputUpdate(lockedDirection);
-			} else {
-				// Use current mouse direction
-				sendInputUpdate(direction);
-			}
+			// Use current mouse direction
+			sendInputUpdate(lastDirection);
 		};
 
 		app.canvas.addEventListener('pointermove', handlePointerMove);
@@ -83,16 +95,6 @@
 	$effect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key.toLowerCase() === 'q') {
-				if (!inputLocked) {
-					// Lock input - capture current mouse position
-					const canvas = app.canvas;
-					const rect = canvas.getBoundingClientRect();
-					const mousePos = new Point(e.clientX - rect.left, e.clientY - rect.top);
-					lockedDirection = computeDesiredDirection(mousePos, {
-						width: canvas.width,
-						height: canvas.height
-					});
-				}
 				inputLocked = !inputLocked;
 			}
 		};

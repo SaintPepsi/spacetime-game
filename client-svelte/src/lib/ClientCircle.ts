@@ -1,3 +1,4 @@
+import type { ClientPlayerPawn } from '$lib/ClientPlayerPawn';
 import type { Circle as CircleData, Entity, Player } from '@module_bindings';
 import { BitmapText, Graphics } from 'pixi.js';
 import { ClientEntity } from './ClientEntity';
@@ -18,6 +19,7 @@ export class ClientCircle extends ClientEntity {
 	public playerNameTag: BitmapText;
 
 	// Player reference
+	public owner?: ClientPlayerPawn;
 	private playerData?: Player;
 
 	constructor(circleData: CircleData, entityData: Entity, playerData?: Player) {

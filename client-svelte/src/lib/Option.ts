@@ -10,24 +10,26 @@ const none: None = { type: 'None' };
 type MapFn<T, U> = (value: T) => PotentialOption<U>;
 type FlatMapFn<T, U> = (value: T) => OptionValue<U>;
 
-type Option<T> = OptionValue<T> & FactoryMethods<T>;
+export type Option<T> = OptionValue<T> & FactoryMethods<T>;
 
 type FactoryMethods<T> = {
 	map<U>(fn: MapFn<T, U>): Option<U>;
 	flatMap<U>(fn: FlatMapFn<T, U>): Option<U>;
+	isSome(): boolean;
 	unwrap(): T | void;
 };
 
 function optionFactory<T>(input: OptionValue<T>): Option<T> {
 	return Object.assign(input, {
 		map: <U>(fn: MapFn<T, U>) => optionFactory(map(input, fn)),
-		flatMap: <U>(fn: (value: T) => OptionValue<U>) => optionFactory(flatMap(input, fn)),
+		flatMap: <U>(fn: FlatMapFn<T, U>) => optionFactory(flatMap(input, fn)),
+		isSome: () => isSome(input),
 		unwrap: () => unwrap(input)
 	});
 }
 
 function createOption<T>(input: PotentialOption<T>) {
-	const wrapped = option(input);
+	const wrapped = wrap(input);
 	return optionFactory(wrapped);
 }
 
@@ -46,7 +48,7 @@ function isSome<T>(input: OptionValue<T>): input is Some<T> {
 	return input.type === 'Some';
 }
 
-function option<T>(input: PotentialOption<T>): OptionValue<T> {
+function wrap<T>(input: PotentialOption<T>): OptionValue<T> {
 	if (input === null || input === undefined) {
 		return none;
 	}
@@ -60,7 +62,7 @@ function isNone<T>(input: OptionValue<T>): input is None {
 function map<T, U>(input: OptionValue<T>, fn: (value: T) => U | null | undefined): OptionValue<U> {
 	if (isSome(input)) {
 		const result = fn(input.value);
-		return option(result);
+		return wrap(result);
 	}
 	return none;
 }
@@ -82,13 +84,4 @@ function flatMap<T, U>(option: OptionValue<T>, fn: (value: T) => OptionValue<U>)
 // const mapped = map(wrapped, getStringLength);
 // const flatMapped = flatMap(wrapped, getStringLength);
 
-export const optionMonad = {
-	isSome,
-	isNone,
-	some,
-	none,
-	option,
-	createOption,
-	map,
-	flatMap
-};
+export const option = createOption;

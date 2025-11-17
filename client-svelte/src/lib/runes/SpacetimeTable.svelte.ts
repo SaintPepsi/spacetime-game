@@ -1,5 +1,9 @@
+import { option } from '$lib/Option';
 import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+import { once } from 'es-toolkit';
+import { NOOP } from 'pixi.js';
 import type { DbConnectionImpl, TableCache } from 'spacetimedb';
+import type { Unsubscriber } from 'svelte/store';
 
 // Interface that can be augmented via module declaration (like TanStack Router)
 export interface Register {
@@ -13,6 +17,7 @@ export interface UseQueryCallbacks<RowType> {
 	onInsert?: (row: RowType) => void;
 	onDelete?: (row: RowType) => void;
 	onUpdate?: (oldRow: RowType, newRow: RowType) => void;
+	onInitialSnapshot?: (rows: readonly RowType[]) => void;
 }
 
 export type Value = string | number | boolean;
@@ -179,6 +184,7 @@ export class TableQuery<
 	#whereClause: Expr<ColumnsFromRow<RowType>> | undefined;
 	#callbacks: UseQueryCallbacks<RowType> | undefined;
 	#query: string;
+	#initialSnapshotHandler: UseQueryCallbacks<RowType>['onInitialSnapshot'];
 	#latestTransactionEvent: any = null;
 	#unsubscribe: (() => void) | null = null;
 	#tableUnSubscribers: Array<() => void> = [];
@@ -198,7 +204,30 @@ export class TableQuery<
 			(whereClause ? ` WHERE ${toString(whereClause)}` : '');
 
 		// Initialize subscription in constructor
-		this.#setupSubscription();
+
+		this.#initialSnapshotHandler = callbacks?.onInitialSnapshot
+			? once(callbacks?.onInitialSnapshot)
+			: NOOP;
+		let unsubscribeStatus: Unsubscriber;
+
+		const handleStatusChange = (status: 'disconnected' | 'connecting' | 'connected' | 'error') => {
+			// console.log('Status changed:', status, tableName);
+			if (status !== 'connected') return;
+			this.#setupSubscription();
+
+			option(unsubscribeStatus).map((unSubscribe) => {
+				// console.log('Unsubscribing from status changes');
+				unSubscribe();
+				this.#tableUnSubscribers = this.#tableUnSubscribers.filter((fn) => fn !== unSubscribe);
+			});
+
+			unsubscribeStatus?.();
+		};
+
+		unsubscribeStatus = SpacetimeDB.status.subscribe(handleStatusChange);
+
+		this.#tableUnSubscribers.push(unsubscribeStatus);
+		// console.log('spacetime status subscribed');
 	}
 
 	/**
@@ -237,6 +266,7 @@ export class TableQuery<
 	#updateSnapshot(): void {
 		// Use untrack to prevent infinite loops if computeSnapshot accesses reactive state
 		this.#rows = this.#computeSnapshot();
+		this.#initialSnapshotHandler?.(this.#rows);
 	}
 
 	#setupSubscription(): void {
