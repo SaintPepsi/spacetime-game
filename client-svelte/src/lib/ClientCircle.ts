@@ -144,15 +144,15 @@ export class ClientCircle extends ClientEntity {
 		super.tick(deltaTime);
 
 		// Update graphic and pointer size based on current scale
-		const radius = ClientEntity.massToRadius(this.mass);
+		// const radius = ClientEntity.massToRadius(this.mass);
 
 		// Update circle graphic with current color
-		const colorHex = parseInt(this.playerData?.color?.replace('#', '') || 'ffffff', 16);
-		this.graphic.clear().circle(0, 0, radius).fill(colorHex);
+		// const colorHex = parseInt(this.playerData?.color?.replace('#', '') || 'ffffff', 16);
+		// this.graphic.clear().circle(0, 0, this.mass).fill(colorHex);
 
 		// Update pointer size and rotation
-		this.pointer.clear().rect(0, -1, radius, 2).fill(0xffffff);
-		this.pointer.rotation = Math.atan2(this.direction.y, this.direction.x);
+		// this.pointer.clear().rect(0, -1, this.mass, 2).fill(0xffffff);
+		// this.pointer.rotation = Math.atan2(this.direction.y, this.direction.x);
 
 		// Interp scale
 		// const newScale = lerp(this.graphicContainer.scale.x, this.mass, 0.2 * deltaTime);
