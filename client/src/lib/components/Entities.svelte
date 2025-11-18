@@ -6,11 +6,11 @@
 	import { dictionaries } from '$lib/data/dictionaries';
 	import { option } from '$lib/Option';
 	// import { PlayerCircles } from '$lib/runes/UserPlayerP';
-	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { UserPlayer } from '$lib/runes/UserPlayer.svelte';
 	import { Player, type Circle, type Entity, type Food } from '@module_bindings';
 	import { sceneContext } from '@routes/SceneContext.svelte';
 	import { Ticker } from 'pixi.js';
+	import { TableQuery } from 'spacetimedb-runes';
 
 	// Entity dictionaries
 

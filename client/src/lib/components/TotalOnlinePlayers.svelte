@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import { SpacetimeDB, TableQuery } from 'spacetimedb-runes';
 
 	const client = SpacetimeDB.getContext();
 

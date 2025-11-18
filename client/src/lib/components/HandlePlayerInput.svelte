@@ -2,9 +2,9 @@
 	import { dictionaries } from '$lib/data/dictionaries';
 	import { option } from '$lib/Option';
 	import { UserPlayer } from '$lib/runes/UserPlayer.svelte';
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 	import { sceneContext } from '@routes/SceneContext.svelte';
 	import { Point } from 'pixi.js';
+	import { SpacetimeDB } from 'spacetimedb-runes';
 
 	let client = SpacetimeDB.getContext();
 

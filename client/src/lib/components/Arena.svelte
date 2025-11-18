@@ -3,11 +3,11 @@
 </script>
 
 <script lang="ts">
-	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
 	import { Container, Graphics, type ContainerChild } from 'pixi.js';
+	import { TableQuery } from 'spacetimedb-runes';
 	import { createContext, type Snippet } from 'svelte';
 
-	let configQuery = new TableQuery('config');
+	let configQuery = new TableQuery('config', ({ where, eq }) => where(eq('id', 0)));
 
 	type Props = {
 		stage: Container;

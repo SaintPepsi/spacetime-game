@@ -1,10 +1,9 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
-	import { DbConnection, type ErrorContext } from '@module_bindings';
+	import { DbConnection } from '@module_bindings';
 	import type { Identity } from 'spacetimedb';
+	import { SpacetimeDB, SpacetimeDBContext } from 'spacetimedb-runes';
 	import { onMount } from 'svelte';
-	import SpacetimeDBContext from './SpacetimeDBContext.svelte';
 
 	let connection = $state(<DbConnection | null>null);
 
@@ -18,13 +17,19 @@
 			});
 		};
 
-		const onDisconnect = (ctx: ErrorContext, error?: Error | undefined) => {
-			SpacetimeDB.status.set('disconnected');
-		};
+		const onDisconnect = () =>
+			// ctx: ErrorContext,
+			// error?: Error | undefined
+			{
+				SpacetimeDB.status.set('disconnected');
+			};
 
-		const onConnectError = (_ctx: ErrorContext, err: Error) => {
-			SpacetimeDB.status.set('error');
-		};
+		const onConnectError = () =>
+			// _ctx: ErrorContext,
+			// err: Error
+			{
+				SpacetimeDB.status.set('error');
+			};
 
 		const connectionBuilder = DbConnection.builder()
 			.withUri('ws://localhost:3000')

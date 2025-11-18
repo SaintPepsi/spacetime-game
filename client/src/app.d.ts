@@ -14,7 +14,7 @@ declare global {
 }
 
 // Augment the SpacetimeTable Register interface with your actual DbConnection type
-declare module '$lib/runes/SpacetimeTable.svelte' {
+declare module 'spacetimedb-runes' {
 	interface Register {
 		connection: DbConnection;
 	}

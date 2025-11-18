@@ -44,6 +44,7 @@
 		"es-toolkit": "^1.41.0",
 		"pixi.js": "^8.14.1",
 		"runed": "^0.36.0",
-		"spacetimedb": "^1.8.0"
+		"spacetimedb": "^1.8.0",
+		"spacetimedb-runes": "link:spacetimedb-runes"
 	}
 }

@@ -1,6 +1,5 @@
 import { option } from '$lib/Option';
-import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
-import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+import { SpacetimeDB, TableQuery } from 'spacetimedb-runes';
 
 export class UserPlayer {
 	#query = new TableQuery('player');

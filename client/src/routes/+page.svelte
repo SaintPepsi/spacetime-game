@@ -10,9 +10,8 @@
 	import HandlePlayerInput from '$lib/components/HandlePlayerInput.svelte';
 	import StartScreen from '$lib/components/StartScreen.svelte';
 	import { createScene, type BaseScene } from '$lib/createScene';
-	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
 	import PixiJSContext from '@routes/SceneContext.svelte';
+	import { SpacetimeDB, TableQuery } from 'spacetimedb-runes';
 
 	let sceneContext = $state<Scene | null>(null);
 

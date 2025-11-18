@@ -1,7 +1,6 @@
 <script lang="ts">
 	import DialogModal from '$lib/components/DialogModal.svelte';
-	import { TableQuery } from '$lib/runes/SpacetimeTable.svelte';
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import { SpacetimeDB, TableQuery } from 'spacetimedb-runes';
 
 	let client = SpacetimeDB.getContext();
 

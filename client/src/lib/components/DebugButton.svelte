@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SpacetimeDB } from '$lib/SpacetimeDB.svelte';
+	import { SpacetimeDB } from 'spacetimedb-runes';
 
 	const client = SpacetimeDB.getContext();
 </script>
